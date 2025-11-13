@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: session-planner-backend
+    env: docker
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: DRILL_STORAGE_BUCKET
+        value: drill-videos
+      - key: MAX_DOWNLOAD_BYTES
+        value: "52428800"
+
