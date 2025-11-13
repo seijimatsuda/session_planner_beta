@@ -1,0 +1,25 @@
+FROM node:18-bullseye
+
+# Install yt-dlp and ffmpeg
+RUN apt-get update && apt-get install -y \
+    yt-dlp \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install --production=false
+
+# Copy source code
+COPY . .
+
+# Build TypeScript
+RUN npm run build
+
+# Start the server
+CMD ["npm", "start"]
+
