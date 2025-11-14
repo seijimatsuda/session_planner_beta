@@ -62,14 +62,17 @@ router.post('/', async (req, res) => {
     try {
       const outputTemplate = path.join(tempDir, '%(id)s.%(ext)s')
       
-      // Retry logic for rate limiting (429 errors)
+      // Retry logic with different YouTube client types to bypass bot detection
       let lastError: Error | null = null
-      const maxRetries = 3
-      const retryDelays = [2000, 5000, 10000] // 2s, 5s, 10s
+      const maxRetries = 4
+      const retryDelays = [2000, 3000, 5000, 8000] // 2s, 3s, 5s, 8s
+      // Try different YouTube client types to avoid bot detection
+      const clientTypes = ['web', 'ios', 'android', 'tv_embedded']
       
       for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
-          await execFileAsync(YT_DLP_BIN, [
+          const clientType = clientTypes[Math.min(attempt, clientTypes.length - 1)]
+          const args = [
             url,
             '-f',
             'bestvideo[height<=360]+bestaudio/best[height<=360]/best[height<=360]',
@@ -79,28 +82,36 @@ router.post('/', async (req, res) => {
             '--user-agent',
             'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
             '--extractor-args',
-            'youtube:player_client=android',
+            `youtube:player_client=${clientType}`,
+            '--no-warnings',
+            '--quiet',
             '--output',
             outputTemplate,
-          ])
+          ]
+          
+          await execFileAsync(YT_DLP_BIN, args)
           lastError = null
           break // Success, exit retry loop
         } catch (error) {
           lastError = error instanceof Error ? error : new Error(String(error))
           const errorMessage = lastError.message.toLowerCase()
           
-          // Check if it's a rate limit error
-          if (errorMessage.includes('429') || errorMessage.includes('too many requests')) {
-            if (attempt < maxRetries) {
-              const delay = retryDelays[attempt]
-              console.log(`[download-video] Rate limited, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`)
-              await new Promise(resolve => setTimeout(resolve, delay))
-              continue
-            } else {
-              throw new Error('YouTube rate limit exceeded. Please try again in a few minutes.')
-            }
+          // Check if it's a rate limit or bot detection error
+          const isRateLimit = errorMessage.includes('429') || errorMessage.includes('too many requests')
+          const isBotDetection = errorMessage.includes('sign in') || errorMessage.includes('not a bot') || errorMessage.includes('bot')
+          
+          if ((isRateLimit || isBotDetection) && attempt < maxRetries) {
+            const delay = retryDelays[attempt]
+            const clientType = clientTypes[Math.min(attempt, clientTypes.length - 1)]
+            console.log(`[download-video] ${isBotDetection ? 'Bot detection' : 'Rate limited'}, retrying with ${clientType} client in ${delay}ms (attempt ${attempt + 1}/${maxRetries})`)
+            await new Promise(resolve => setTimeout(resolve, delay))
+            continue
+          } else if (isRateLimit) {
+            throw new Error('YouTube rate limit exceeded. Please try again in a few minutes.')
+          } else if (isBotDetection) {
+            throw new Error('YouTube is blocking automated access. Please try again later or use manual video upload.')
           }
-          // If it's not a rate limit error, throw immediately
+          // If it's not a rate limit or bot detection error, throw immediately
           throw lastError
         }
       }
@@ -161,10 +172,13 @@ router.post('/', async (req, res) => {
     
     // Provide user-friendly error messages
     let statusCode = 500
-    if (message.toLowerCase().includes('rate limit') || message.toLowerCase().includes('429')) {
+    const lowerMessage = message.toLowerCase()
+    if (lowerMessage.includes('rate limit') || lowerMessage.includes('429')) {
       statusCode = 429
-    } else if (message.toLowerCase().includes('not found') || message.toLowerCase().includes('unavailable')) {
+    } else if (lowerMessage.includes('not found') || lowerMessage.includes('unavailable')) {
       statusCode = 404
+    } else if (lowerMessage.includes('blocking automated') || lowerMessage.includes('bot') || lowerMessage.includes('sign in')) {
+      statusCode = 403 // Forbidden - bot detection
     }
     
     return res.status(statusCode).json({ error: message })
