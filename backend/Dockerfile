@@ -1,10 +1,15 @@
 FROM node:18-bullseye
 
-# Install yt-dlp and ffmpeg
+# Install system dependencies and Python for yt-dlp
 RUN apt-get update && apt-get install -y \
-    yt-dlp \
     ffmpeg \
+    python3 \
+    python3-pip \
+    wget \
     && rm -rf /var/lib/apt/lists/*
+
+# Install yt-dlp via pip
+RUN pip3 install --no-cache-dir yt-dlp
 
 WORKDIR /app
 
