@@ -1,14 +1,13 @@
-FROM node:18-bullseye
+FROM node:18-bookworm
 
 # Install system dependencies and Python 3.11 for yt-dlp
 RUN apt-get update && apt-get install -y \
     ffmpeg \
-    python3.11 \
-    python3.11-pip \
-    python3.11-venv \
+    python3 \
+    python3-pip \
+    python3-venv \
     wget \
-    && rm -rf /var/lib/apt/lists/* \
-    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1
+    && rm -rf /var/lib/apt/lists/*
 
 # Install yt-dlp via pip
 RUN pip3 install --no-cache-dir yt-dlp
