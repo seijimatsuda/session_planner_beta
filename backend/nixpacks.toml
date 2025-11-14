@@ -3,7 +3,7 @@ nixPkgs = ["nodejs-18_x", "python3", "ffmpeg"]
 
 [phases.install]
 cmds = [
-  "pip3 install yt-dlp",
+  "pip3 install --user yt-dlp",
   "npm install"
 ]
 
@@ -12,4 +12,7 @@ cmds = ["npm run build"]
 
 [start]
 cmd = "npm start"
+
+[variables]
+PATH = "/root/.local/bin:$PATH"
 
