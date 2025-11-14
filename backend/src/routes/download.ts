@@ -12,8 +12,7 @@ const execFileAsync = promisify(execFile)
 const SUPABASE_URL = process.env.SUPABASE_URL
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const STORAGE_BUCKET = process.env.DRILL_STORAGE_BUCKET ?? 'drill-videos'
-// Resolve yt-dlp path: use env var, or look in project root (one level up from dist/)
-const YT_DLP_BIN = process.env.YT_DLP_BIN ?? path.join(process.cwd(), 'yt-dlp')
+const YT_DLP_BIN = process.env.YT_DLP_BIN ?? 'yt-dlp'
 const FFMPEG_BIN = process.env.FFMPEG_BIN ?? 'ffmpeg'
 const MAX_FILE_BYTES = Number(process.env.MAX_DOWNLOAD_BYTES ?? 50 * 1024 * 1024)
 const ALLOWED_DOMAINS = [
@@ -62,10 +61,7 @@ router.post('/', async (req, res) => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'yt-dlp-'))
     try {
       const outputTemplate = path.join(tempDir, '%(id)s.%(ext)s')
-      
-      // Try yt-dlp binary first, fallback to python module
-      let ytdlpCmd = YT_DLP_BIN
-      let ytdlpArgs = [
+      await execFileAsync(YT_DLP_BIN, [
         url,
         '-f',
         'bestvideo[height<=360]+bestaudio/best[height<=360]/best[height<=360]',
@@ -74,20 +70,7 @@ router.post('/', async (req, res) => {
         '--no-playlist',
         '--output',
         outputTemplate,
-      ]
-      
-      try {
-        await execFileAsync(ytdlpCmd, ytdlpArgs)
-      } catch (error: any) {
-        if (error.code === 'ENOENT' && ytdlpCmd === 'yt-dlp') {
-          // Fallback to python module
-          ytdlpCmd = 'python3'
-          ytdlpArgs = ['-m', 'yt_dlp', ...ytdlpArgs]
-          await execFileAsync(ytdlpCmd, ytdlpArgs)
-        } else {
-          throw error
-        }
-      }
+      ])
 
       const files = await fs.readdir(tempDir)
       let finalPath = files.find((file) => file.match(/\.(mp4|mkv|webm|mov)$/i))
