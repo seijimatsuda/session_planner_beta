@@ -1,9 +1,10 @@
 [phases.setup]
-nixPkgs = ["nodejs-18_x", "python3", "ffmpeg"]
+nixPkgs = ["nodejs-18_x", "ffmpeg", "wget"]
 
 [phases.install]
 cmds = [
-  "pip3 install --user yt-dlp",
+  "wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /usr/local/bin/yt-dlp",
+  "chmod a+rx /usr/local/bin/yt-dlp",
   "npm install"
 ]
 
@@ -12,7 +13,4 @@ cmds = ["npm run build"]
 
 [start]
 cmd = "npm start"
-
-[variables]
-PATH = "/root/.local/bin:$PATH"
 
