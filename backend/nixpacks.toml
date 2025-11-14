@@ -1,11 +1,9 @@
 [phases.setup]
-nixPkgs = ["nodejs-18_x"]
+nixPkgs = ["nodejs-18_x", "python3", "ffmpeg"]
 
 [phases.install]
 cmds = [
-  "apt-get update",
-  "apt-get install -y yt-dlp ffmpeg",
-  "rm -rf /var/lib/apt/lists/*",
+  "pip3 install yt-dlp",
   "npm install"
 ]
 
