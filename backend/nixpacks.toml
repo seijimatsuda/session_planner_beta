@@ -3,8 +3,8 @@ nixPkgs = ["nodejs-18_x", "ffmpeg", "wget"]
 
 [phases.install]
 cmds = [
-  "wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O /usr/local/bin/yt-dlp",
-  "chmod a+rx /usr/local/bin/yt-dlp",
+  "wget https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp -O yt-dlp",
+  "chmod a+rx yt-dlp",
   "npm install"
 ]
 

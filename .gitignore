@@ -28,4 +28,7 @@ dist/
 .vscode/
 *.swp
 
+# Downloaded binaries
+backend/yt-dlp
+
 

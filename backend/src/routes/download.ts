@@ -12,7 +12,8 @@ const execFileAsync = promisify(execFile)
 const SUPABASE_URL = process.env.SUPABASE_URL
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
 const STORAGE_BUCKET = process.env.DRILL_STORAGE_BUCKET ?? 'drill-videos'
-const YT_DLP_BIN = process.env.YT_DLP_BIN ?? 'yt-dlp'
+// Resolve yt-dlp path: use env var, or look in project root (one level up from dist/)
+const YT_DLP_BIN = process.env.YT_DLP_BIN ?? path.join(process.cwd(), 'yt-dlp')
 const FFMPEG_BIN = process.env.FFMPEG_BIN ?? 'ffmpeg'
 const MAX_FILE_BYTES = Number(process.env.MAX_DOWNLOAD_BYTES ?? 50 * 1024 * 1024)
 const ALLOWED_DOMAINS = [
