@@ -9,8 +9,8 @@ RUN apt-get update && apt-get install -y \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Install yt-dlp via pip
-RUN pip3 install --no-cache-dir yt-dlp
+# Install yt-dlp via pip (--break-system-packages needed for Python 3.11+ PEP 668)
+RUN pip3 install --no-cache-dir --break-system-packages yt-dlp
 
 WORKDIR /app
 
