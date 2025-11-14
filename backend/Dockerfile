@@ -9,13 +9,13 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy package files
-COPY backend/package*.json ./
+COPY package*.json ./
 
 # Install dependencies
 RUN npm install --production=false
 
 # Copy source code
-COPY backend/ .
+COPY . .
 
 # Build TypeScript
 RUN npm run build
