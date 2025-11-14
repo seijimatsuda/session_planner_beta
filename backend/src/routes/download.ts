@@ -61,7 +61,10 @@ router.post('/', async (req, res) => {
     const tempDir = await fs.mkdtemp(path.join(os.tmpdir(), 'yt-dlp-'))
     try {
       const outputTemplate = path.join(tempDir, '%(id)s.%(ext)s')
-      await execFileAsync(YT_DLP_BIN, [
+      
+      // Try yt-dlp binary first, fallback to python module
+      let ytdlpCmd = YT_DLP_BIN
+      let ytdlpArgs = [
         url,
         '-f',
         'bestvideo[height<=360]+bestaudio/best[height<=360]/best[height<=360]',
@@ -70,7 +73,20 @@ router.post('/', async (req, res) => {
         '--no-playlist',
         '--output',
         outputTemplate,
-      ])
+      ]
+      
+      try {
+        await execFileAsync(ytdlpCmd, ytdlpArgs)
+      } catch (error: any) {
+        if (error.code === 'ENOENT' && ytdlpCmd === 'yt-dlp') {
+          // Fallback to python module
+          ytdlpCmd = 'python3'
+          ytdlpArgs = ['-m', 'yt_dlp', ...ytdlpArgs]
+          await execFileAsync(ytdlpCmd, ytdlpArgs)
+        } else {
+          throw error
+        }
+      }
 
       const files = await fs.readdir(tempDir)
       let finalPath = files.find((file) => file.match(/\.(mp4|mkv|webm|mov)$/i))
