@@ -1,12 +1,147 @@
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
+import { sessionService } from '../services/database'
+import type { Session } from '../types'
+
 export function SavedSessions() {
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  const { data: sessions = [], isLoading, error } = useQuery({
+    queryKey: ['sessions'],
+    queryFn: sessionService.getAll,
+  })
+
+  const deleteMutation = useMutation({
+    mutationFn: sessionService.delete,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
+    },
+    onError: (error) => {
+      alert(`Failed to delete session: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    },
+  })
+
+  const duplicateMutation = useMutation({
+    mutationFn: async (session: Session) => {
+      return sessionService.create({
+        name: `${session.name} (Copy)`,
+        grid_data: session.grid_data,
+        user_id: session.user_id,
+      })
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['sessions'] })
+    },
+    onError: (error) => {
+      alert(`Failed to duplicate session: ${error instanceof Error ? error.message : 'Unknown error'}`)
+    },
+  })
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-sm text-slate-600">Loading sessions...</div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
+        <p className="text-lg font-medium text-red-800">Error loading sessions</p>
+        <p className="mt-2 text-sm text-red-600">
+          {error instanceof Error ? error.message : 'An unknown error occurred'}
+        </p>
+        <button
+          onClick={() => queryClient.invalidateQueries({ queryKey: ['sessions'] })}
+          className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+        >
+          Retry
+        </button>
+      </div>
+    )
+  }
+
   return (
-    <div className="rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center text-sm text-slate-500">
-      <p className="font-medium text-slate-600">Saved Sessions Placeholder</p>
-      <p className="mt-2">
-        Session listings and management tools will arrive in Phase 6. Continue building the data
-        flow and UI in upcoming phases.
-      </p>
+    <div className="space-y-6">
+      <header>
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900">Saved Sessions</h1>
+            <p className="mt-2 text-sm text-slate-600">
+              Review, edit, duplicate, or delete your session plans
+            </p>
+          </div>
+          <button
+            onClick={() => navigate('/sessions/new')}
+            className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-green-700 sm:w-auto"
+          >
+            + New Session
+          </button>
+        </div>
+      </header>
+
+      {sessions.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
+          <p className="text-lg font-medium text-slate-600">No sessions yet. Create your first session!</p>
+          <button
+            onClick={() => navigate('/sessions/new')}
+            className="mt-4 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700"
+          >
+            Create Your First Session
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {sessions.map((session) => {
+            const drillCount = session.grid_data.grid
+              .flat()
+              .filter((cell) => cell !== null).length
+
+            return (
+              <div
+                key={session.id}
+                className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+              >
+                <h3 className="mb-2 text-xl font-semibold text-slate-900">{session.name}</h3>
+                <p className="mb-1 text-sm text-slate-600">
+                  {drillCount} drill{drillCount !== 1 ? 's' : ''}
+                </p>
+                <p className="mb-4 text-xs text-slate-500">
+                  Created {new Date(session.created_at).toLocaleDateString()}
+                </p>
+
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => navigate(`/sessions/${session.id}/edit`)}
+                    className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => duplicateMutation.mutate(session)}
+                    disabled={duplicateMutation.isPending}
+                    className="flex-1 rounded-lg bg-yellow-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-yellow-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+                  >
+                    {duplicateMutation.isPending ? '...' : 'Duplicate'}
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm('Delete this session?')) {
+                        deleteMutation.mutate(session.id)
+                      }
+                    }}
+                    className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
-

@@ -12,7 +12,7 @@ interface AddDrillFormProps {
 
 export function AddDrillForm({ onSuccess }: AddDrillFormProps) {
   const { user } = useAuth()
-  const [videoFile, setVideoFile] = useState<File | null>(null)
+  const [mediaFile, setMediaFile] = useState<File | null>(null)
   const [equipmentInput, setEquipmentInput] = useState('')
   const [tagInput, setTagInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -24,16 +24,17 @@ export function AddDrillForm({ onSuccess }: AddDrillFormProps) {
     watch,
     reset,
     formState: { errors },
-  } = useForm<DrillFormData>({
+  } = useForm({
     resolver: zodResolver(drillSchema),
     defaultValues: {
+      video_url: '',
       equipment: [],
       tags: [],
     },
   })
 
-  const equipment = watch('equipment')
-  const tags = watch('tags')
+  const equipment = watch('equipment') ?? []
+  const tags = watch('tags') ?? []
 
   const addEquipment = () => {
     const value = equipmentInput.trim()
@@ -69,27 +70,32 @@ export function AddDrillForm({ onSuccess }: AddDrillFormProps) {
       return
     }
 
-    if (!videoFile) {
-      alert('Please upload a video file.')
+    if (!mediaFile) {
+      alert('Please upload a screenshot or video file.')
       return
     }
 
     setIsSubmitting(true)
     try {
-      const videoPath = await storageService.uploadVideo(videoFile, user.id)
+      const mediaPath = await storageService.uploadMedia(mediaFile, user.id)
 
       await drillService.create({
         ...data,
-        video_file_path: videoPath,
+        video_url: data.video_url || '',
+        video_file_path: mediaPath,
         user_id: user.id,
       })
 
       reset()
-      setVideoFile(null)
+      setMediaFile(null)
       onSuccess()
     } catch (error) {
       console.error('Failed to create drill:', error)
-      alert('Failed to create drill. Please try again.')
+      const message =
+        error instanceof Error
+          ? error.message
+          : 'Failed to create drill. Please try again.'
+      alert(message)
     } finally {
       setIsSubmitting(false)
     }
@@ -98,26 +104,37 @@ export function AddDrillForm({ onSuccess }: AddDrillFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">Video URL</label>
+        <label className="mb-2 block text-sm font-medium text-slate-700">
+          Upload Screenshot or Video <span className="text-red-500">*</span>
+        </label>
+        <input
+          type="file"
+          accept="image/*,video/*"
+          onChange={(event) => setMediaFile(event.target.files?.[0] ?? null)}
+          className="w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-blue-600 hover:file:bg-blue-100"
+          required
+        />
+        <p className="mt-2 text-xs text-slate-500">
+          Upload a screenshot or video of the drill being done. This will be used to visualize the drill in your library.
+        </p>
+        {mediaFile && (
+          <p className="mt-1 text-xs text-green-600">
+            Selected: {mediaFile.name} ({(mediaFile.size / 1024 / 1024).toFixed(2)} MB)
+          </p>
+        )}
+      </div>
+
+      <div>
+        <label className="mb-2 block text-sm font-medium text-slate-700">Video URL (optional)</label>
         <input
           type="url"
-          placeholder="https://youtube.com/watch?v=..."
+          placeholder="https://youtube.com/watch?v=... (optional reference link)"
           {...register('video_url')}
           className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
         />
         {errors.video_url ? <p className="mt-1 text-sm text-red-500">{errors.video_url.message}</p> : null}
-      </div>
-
-      <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">Upload Video File</label>
-        <input
-          type="file"
-          accept="video/*"
-          onChange={(event) => setVideoFile(event.target.files?.[0] ?? null)}
-          className="w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-blue-600 hover:file:bg-blue-100"
-        />
         <p className="mt-2 text-xs text-slate-500">
-          Download the video from the link above (e.g., with yt-dlp) and upload it here while we build the automated fetcher in a later phase.
+          Optionally provide a reference link to the source video (e.g., YouTube, Instagram) for this drill.
         </p>
       </div>
 

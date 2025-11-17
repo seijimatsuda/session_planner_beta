@@ -1,14 +1,19 @@
 import { supabase } from '../lib/supabase'
 
 export const storageService = {
-  async uploadVideo(file: File, userId: string): Promise<string> {
-    const extension = file.name.split('.').pop() ?? 'mp4'
+  async uploadMedia(file: File, userId: string): Promise<string> {
+    const extension = file.name.split('.').pop() ?? (file.type.startsWith('image/') ? 'jpg' : 'mp4')
     const fileName = `${userId}/${Date.now()}.${extension}`
 
     const { error } = await supabase.storage.from('drill-videos').upload(fileName, file)
     if (error) throw error
 
     return fileName
+  },
+
+  async uploadVideo(file: File, userId: string): Promise<string> {
+    // Legacy method for backward compatibility
+    return this.uploadMedia(file, userId)
   },
 
   async getVideoUrl(path: string, expiresInSeconds = 60): Promise<string> {

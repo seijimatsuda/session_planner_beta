@@ -1,6 +1,5 @@
 import express from 'express'
 import cors from 'cors'
-import downloadRouter from './routes/download'
 
 const app = express()
 app.use(cors())
@@ -10,9 +9,7 @@ app.get('/healthz', (_req, res) => {
   res.status(200).json({ status: 'ok' })
 })
 
-app.use('/api/download-video', downloadRouter)
-
 const port = process.env.PORT ?? 3000
 app.listen(port, () => {
-  console.log(`Downloader listening on port ${port}`)
+  console.log(`Server listening on port ${port}`)
 })

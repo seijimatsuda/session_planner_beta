@@ -2,7 +2,12 @@ import { z } from 'zod'
 
 export const drillSchema = z.object({
   name: z.string().min(1, 'Name is required').max(100),
-  video_url: z.string().url('Must be a valid URL'),
+  video_url: z
+    .string()
+    .refine((val) => val === '' || z.string().url().safeParse(val).success, {
+      message: 'Must be a valid URL',
+    })
+    .default(''),
   category: z.enum(['activation', 'dribbling', 'passing', 'shooting']),
   num_players: z
     .union([z.number().int().positive().max(50), z.null()])
