@@ -106,6 +106,13 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
           </div>
         )}
 
+        {/* Creator Attribution */}
+        {drill.creator_email && (
+          <p className="mb-3 text-xs text-slate-500">
+            Created by {drill.creator_email}
+          </p>
+        )}
+
         {/* Actions */}
         <div className="mt-3 flex gap-2">
           <button

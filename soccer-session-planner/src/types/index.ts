@@ -11,6 +11,7 @@ export interface Drill {
   equipment: string[]
   tags: string[]
   user_id: string
+  creator_email?: string // Added for shared access attribution
 }
 
 export interface GridCell {
@@ -26,6 +27,7 @@ export interface Session {
     grid: (GridCell | null)[][]
   }
   user_id: string
+  creator_email?: string // Added for shared access attribution
 }
 
 export type NewDrill = Omit<Drill, 'id' | 'created_at' | 'user_id' | 'video_file_path'>

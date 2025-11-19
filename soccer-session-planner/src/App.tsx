@@ -6,6 +6,7 @@ import { Library } from './pages/Library'
 import { AddDrill } from './pages/AddDrill'
 import { SavedSessions } from './pages/SavedSessions'
 import { SessionPlanner } from './pages/SessionPlanner'
+import { SessionView } from './pages/SessionView'
 import { Login } from './pages/Login'
 import { Signup } from './pages/Signup'
 
@@ -22,6 +23,7 @@ export function App() {
           <Route path="drills/new" element={<AddDrill />} />
           <Route path="sessions" element={<SavedSessions />} />
           <Route path="sessions/new" element={<SessionPlanner />} />
+          <Route path="sessions/:id" element={<SessionView />} />
           <Route path="sessions/:id/edit" element={<SessionPlanner />} />
         </Route>
       </Route>

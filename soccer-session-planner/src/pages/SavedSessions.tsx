@@ -108,16 +108,22 @@ export function SavedSessions() {
                 <p className="mb-1 text-sm text-slate-600">
                   {drillCount} drill{drillCount !== 1 ? 's' : ''}
                 </p>
-                <p className="mb-4 text-xs text-slate-500">
+                <p className="mb-1 text-xs text-slate-500">
                   Created {new Date(session.created_at).toLocaleDateString()}
                 </p>
+                {session.creator_email && (
+                  <p className="mb-4 text-xs text-slate-500">
+                    Created by {session.creator_email}
+                  </p>
+                )}
+                {!session.creator_email && <div className="mb-4" />}
 
                 <div className="flex gap-2">
                   <button
-                    onClick={() => navigate(`/sessions/${session.id}/edit`)}
+                    onClick={() => navigate(`/sessions/${session.id}`)}
                     className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
                   >
-                    Edit
+                    View
                   </button>
                   <button
                     onClick={() => duplicateMutation.mutate(session)}

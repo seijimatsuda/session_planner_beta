@@ -1710,6 +1710,56 @@ Example grid_data structure:
 
 ---
 
+## PHASE 8: Shared Access & Session Viewing
+
+**Goal:** Enable shared library/sessions for coaching staff collaboration and add read-only session view.
+
+### Tasks:
+
+1. **Update RLS Policies for Shared Access:**
+   - All authenticated users can view/edit/delete all drills
+   - All authenticated users can view/edit/delete all sessions
+   - See SQL migration in `SHARED_ACCESS_MIGRATION.sql`
+
+2. **Update Storage Policies for Shared Access:**
+   - All authenticated users can view all videos/images
+   - All authenticated users can upload/delete any files
+   - See SQL migration in `SHARED_STORAGE_MIGRATION.sql`
+
+3. **Add Creator Attribution:**
+   - Update database queries to include user email for drills/sessions
+   - Display creator info on drill cards and session cards
+   - Show "Created by [email]" in UI
+
+4. **Create Session View Page:**
+   - New route: `/sessions/:id` (read-only view)
+   - Existing route: `/sessions/:id/edit` (edit mode)
+   - Display dynamic grid (only show filled cells, not 4x3 if not full)
+   - Click drill in grid to see full details (modal or expand)
+   - Include Edit, Duplicate, Delete buttons
+
+5. **Update Navigation:**
+   - Click session card → goes to `/sessions/:id` (view)
+   - Edit button → goes to `/sessions/:id/edit` (edit)
+
+### Testing Phase 8:
+- [ ] All users can see all drills in library
+- [ ] All users can edit/delete any drill
+- [ ] Creator attribution shows on drills
+- [ ] All users can see all sessions
+- [ ] All users can edit/delete any session
+- [ ] Creator attribution shows on sessions
+- [ ] Can view videos/images from all users
+- [ ] Session view page shows grid correctly
+- [ ] Dynamic grid sizing works (not always 4x3)
+- [ ] Can click drill in view to see details
+- [ ] Edit/Duplicate/Delete buttons work in view mode
+- [ ] Click session card goes to view, not edit
+
+**DO NOT PROCEED TO PHASE 7 UNTIL ALL TESTS PASS.**
+
+---
+
 ## PHASE 7: Polish & Deployment
 
 **Goal:** Add final touches, handle edge cases, and deploy the app.
