@@ -156,9 +156,7 @@ export function Library() {
               key={drill.id}
               drill={drill}
               onEdit={(drill) => {
-                // TODO: Implement edit modal in Phase 5
-                console.log('Edit drill:', drill)
-                alert('Edit functionality coming soon!')
+                navigate(`/drills/${drill.id}/edit`)
               }}
               onDelete={(id) => deleteMutation.mutate(id)}
             />

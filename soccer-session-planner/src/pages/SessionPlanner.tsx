@@ -7,6 +7,7 @@ import { drillService, sessionService } from '../services/database'
 import { useAuth } from '../hooks/useAuth'
 import { SessionGrid } from '../components/SessionGrid'
 import { DraggableDrill } from '../components/DraggableDrill'
+import { DrillDetailModal } from '../components/DrillDetailModal'
 import type { Drill, Category, GridCell } from '../types'
 
 export function SessionPlanner() {
@@ -22,6 +23,7 @@ export function SessionPlanner() {
       .map(() => Array(3).fill(null)),
   )
   const [activeDrill, setActiveDrill] = useState<Drill | null>(null)
+  const [selectedDrill, setSelectedDrill] = useState<Drill | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<Category | 'all'>('all')
   const [sessionName, setSessionName] = useState('')
 
@@ -211,7 +213,11 @@ export function SessionPlanner() {
       <DndContext onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
         {/* Session Grid */}
         <div className="mb-8">
-          <SessionGrid grid={grid} onRemoveDrill={handleRemoveDrill} />
+          <SessionGrid
+            grid={grid}
+            onRemoveDrill={handleRemoveDrill}
+            onDrillClick={(drill) => setSelectedDrill(drill)}
+          />
         </div>
 
         {/* Drill Library */}
@@ -294,6 +300,14 @@ export function SessionPlanner() {
           </div>
         </div>
       </div>
+
+      {/* Drill Detail Modal */}
+      {selectedDrill && (
+        <DrillDetailModal
+          drill={selectedDrill}
+          onClose={() => setSelectedDrill(null)}
+        />
+      )}
     </div>
   )
 }

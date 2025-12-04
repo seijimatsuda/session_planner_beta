@@ -7,9 +7,10 @@ interface GridCellProps {
   colIndex: number
   category: string
   onRemove: (rowIndex: number, colIndex: number) => void
+  onDrillClick?: (drill: Drill) => void
 }
 
-function GridCell({ drill, rowIndex, colIndex, category, onRemove }: GridCellProps) {
+function GridCell({ drill, rowIndex, colIndex, category, onRemove, onDrillClick }: GridCellProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: `cell-${rowIndex}-${colIndex}`,
     data: { rowIndex, colIndex, category },
@@ -33,12 +34,19 @@ function GridCell({ drill, rowIndex, colIndex, category, onRemove }: GridCellPro
     >
       {drill ? (
         <div className="flex h-full flex-col">
-          <div className="flex-1 flex items-center justify-center text-center text-sm font-medium text-slate-900">
-            {drill.name}
-          </div>
           <button
-            onClick={() => onRemove(rowIndex, colIndex)}
-            className="absolute right-1 top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs text-white transition hover:bg-red-600"
+            type="button"
+            className="flex-1 flex items-center justify-center text-center text-sm font-medium text-slate-900 cursor-pointer hover:underline touch-manipulation min-h-[44px]"
+            onClick={() => onDrillClick?.(drill)}
+          >
+            {drill.name}
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onRemove(rowIndex, colIndex)
+            }}
+            className="absolute right-1 top-1 flex h-10 w-10 items-center justify-center rounded-full bg-red-500 text-sm font-bold text-white transition hover:bg-red-600 touch-manipulation"
             aria-label="Remove drill"
           >
             ×
@@ -56,9 +64,10 @@ function GridCell({ drill, rowIndex, colIndex, category, onRemove }: GridCellPro
 interface SessionGridProps {
   grid: (Drill | null)[][]
   onRemoveDrill: (rowIndex: number, colIndex: number) => void
+  onDrillClick?: (drill: Drill) => void
 }
 
-export function SessionGrid({ grid, onRemoveDrill }: SessionGridProps) {
+export function SessionGrid({ grid, onRemoveDrill, onDrillClick }: SessionGridProps) {
   const categories = ['activation', 'dribbling', 'passing', 'shooting']
 
   return (
@@ -74,6 +83,7 @@ export function SessionGrid({ grid, onRemoveDrill }: SessionGridProps) {
               colIndex={colIndex}
               category={categories[rowIndex]}
               onRemove={onRemoveDrill}
+              onDrillClick={onDrillClick}
             />
           )),
         )}

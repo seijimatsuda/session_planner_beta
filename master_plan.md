@@ -1760,6 +1760,122 @@ Example grid_data structure:
 
 ---
 
+## PHASE 9: Feature Enhancements & iOS Compatibility
+
+**Goal:** Add drill editing functionality, fix iOS/iPad media display issues, enable drill detail viewing from sessions, and improve mobile layout compatibility.
+
+### Tasks:
+
+1. **Implement Edit Drill Functionality:**
+   - Create EditDrillForm component (or modify AddDrillForm to support edit mode)
+   - Allow editing all drill fields: name, category, num_players, equipment, tags, video_url
+   - Support replacing video/image file (upload new file)
+   - Keep existing media if no new file is uploaded during edit
+   - Allow editing all drills (no ownership restriction, following shared access model)
+   - Create edit drill page/route: `/drills/:id/edit`
+   - Update Library page to navigate to edit page when Edit button clicked
+   - Use existing `drillService.update()` method
+
+2. **Fix iPad/iOS Media Display Issues:**
+   - **Problem:** Videos and images show blank grey screen in Library view and when viewing media
+   - **Solution:**
+     - Automatically load and display thumbnail/preview for images (don't wait for click)
+     - Use native iOS video controls (ensure proper video element attributes)
+     - Fix signed URL expiration issues (increase expiration time or refresh as needed)
+     - Ensure proper MIME types and video codec compatibility (H.264 for iOS)
+     - Add proper error handling for media loading failures
+     - Pre-load media URLs when drill cards are rendered (use React Query or similar)
+     - Use proper image/video element attributes for iOS compatibility:
+       - Video: Add `playsInline` attribute for iOS
+       - Image: Ensure proper `loading` attributes
+     - Check and fix Supabase storage signed URL configuration
+
+3. **Add Drill Detail Modal to Session Planner:**
+   - When a drill is placed in the grid, make it clickable
+   - Clicking a drill in SessionPlanner grid opens a modal showing all drill details:
+     - Name
+     - Category
+     - Number of players
+     - Media (video/image) with automatic thumbnail display
+     - Equipment list
+     - Tags
+     - Creator email (if shared)
+     - Video URL (if provided)
+   - Use same modal pattern as SessionView (reusable DrillDetailModal component)
+   - Modal should work on both desktop and mobile/iPad
+
+4. **iPhone Layout Adjustments:**
+   - Ensure responsive design works well on iPhone screens
+   - Adjust grid layouts for smaller screens
+   - Ensure touch targets are appropriately sized (minimum 44x44px)
+   - Test and fix any layout issues specific to iPhone viewport
+   - Ensure modals are properly sized and scrollable on iPhone
+   - Test navigation and button layouts on iPhone
+
+5. **iPad Layout Compatibility:**
+   - Maintain existing layout for iPad (generally similar to desktop)
+   - Focus on fixing media display issues (priority)
+   - Ensure touch interactions work smoothly
+   - Test drag-and-drop functionality on iPad
+
+### Implementation Details:
+
+**Edit Drill Form:**
+- Create `EditDrill.tsx` page component
+- Modify or create `EditDrillForm.tsx` component that:
+  - Pre-fills form with existing drill data
+  - Shows current media (video/image thumbnail)
+  - Allows uploading new media file (optional)
+  - Updates drill using `drillService.update()`
+  - If new media uploaded: upload new file, update `video_file_path`, optionally delete old file
+  - If no new media: keep existing `video_file_path`
+
+**Media Display Fixes:**
+- Update `DrillCard.tsx` to:
+  - Automatically load and display thumbnail on mount (use `useEffect`)
+  - Show thumbnail immediately (don't wait for click)
+  - Handle both image and video files appropriately
+  - Add proper iOS video attributes: `playsInline`, `controls`, etc.
+- Update storage service to use longer expiration times for signed URLs
+- Add error boundaries for media loading failures
+- Consider using Supabase public URLs or CDN if signed URLs cause issues
+
+**Drill Detail Modal:**
+- Extract `DrillDetailModal` from `SessionView.tsx` into separate component (`src/components/DrillDetailModal.tsx`)
+- Import and use in `SessionPlanner.tsx`
+- Update `SessionGrid.tsx` to make drill cards clickable
+- Pass click handler from SessionPlanner to SessionGrid to GridCell
+
+**Mobile Layout:**
+- Review and update Tailwind responsive classes
+- Test on iPhone SE, iPhone 12/13/14, iPhone Pro Max sizes
+- Ensure proper viewport meta tag
+- Add mobile-specific CSS adjustments if needed
+
+### Testing Phase 9:
+- [ ] Can navigate to edit drill page from Library
+- [ ] Edit form pre-fills with existing drill data
+- [ ] Can update all drill fields
+- [ ] Can upload new media file to replace existing
+- [ ] Existing media is preserved if no new file uploaded
+- [ ] Drill updates successfully save to database
+- [ ] Media displays correctly on iPad (no blank grey screen)
+- [ ] Media displays correctly on iPhone
+- [ ] Images show thumbnail automatically in Library view
+- [ ] Videos show thumbnail/play button automatically in Library view
+- [ ] Videos play with native iOS controls on iPad/iPhone
+- [ ] Can click drill in SessionPlanner grid to view details
+- [ ] Drill detail modal shows all drill information
+- [ ] Drill detail modal works on iPad
+- [ ] Drill detail modal works on iPhone
+- [ ] Layout is usable and responsive on iPhone
+- [ ] Layout works well on iPad
+- [ ] All touch interactions work on mobile devices
+
+**DO NOT PROCEED UNTIL ALL TESTS PASS.**
+
+---
+
 ## PHASE 7: Polish & Deployment
 
 **Goal:** Add final touches, handle edge cases, and deploy the app.
