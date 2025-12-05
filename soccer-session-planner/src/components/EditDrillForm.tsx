@@ -29,15 +29,14 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
     handleSubmit,
     setValue,
     watch,
-    reset,
     formState: { errors },
-  } = useForm<DrillFormData>({
+  } = useForm({
     resolver: zodResolver(drillSchema),
     defaultValues: {
       name: drill.name,
       video_url: drill.video_url || '',
       category: drill.category,
-      num_players: drill.num_players,
+      num_players: drill.num_players ?? null,
       equipment: drill.equipment || [],
       tags: drill.tags || [],
     },
@@ -104,6 +103,11 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
   }
 
   const onSubmit = async (data: DrillFormData) => {
+    // Ensure video_url is always a string
+    const formData: DrillFormData = {
+      ...data,
+      video_url: data.video_url || '',
+    }
     if (!user) {
       alert('You must be logged in to edit drills.')
       return
@@ -122,8 +126,7 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
 
       // Update drill in database
       await drillService.update(drill.id, {
-        ...data,
-        video_url: data.video_url || '',
+        ...formData,
         video_file_path: mediaPath,
       })
 
