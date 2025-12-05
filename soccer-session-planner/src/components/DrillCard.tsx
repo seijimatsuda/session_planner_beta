@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import type { Drill } from '../types'
 import { storageService } from '../services/storage'
+import { runStorageDiagnostics, logDiagnostics } from '../utils/storageDiagnostics'
 
 interface DrillCardProps {
   drill: Drill
@@ -31,14 +32,22 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
       
       try {
         // Use longer expiration for thumbnail display (1 hour, or 2 hours for iOS)
+        console.log('[DrillCard] Loading media for drill:', drill.name, 'Path:', drill.video_file_path)
         const url = await storageService.getVideoUrl(drill.video_file_path, 3600)
+        console.log('[DrillCard] Media URL loaded successfully:', url.substring(0, 100) + '...')
         
         if (isMounted) {
           setMediaUrl(url)
           retryCount = 0 // Reset retry count on success
         }
       } catch (error) {
-        console.error('Error loading media:', error, 'Retry:', retryCount)
+        console.error('[DrillCard] Error loading media:', {
+          error,
+          message: error instanceof Error ? error.message : String(error),
+          drillName: drill.name,
+          path: drill.video_file_path,
+          retry: retryCount,
+        })
         
         if (isMounted) {
           if (retryCount < maxRetries) {
@@ -51,6 +60,20 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
             }, 1000 * retryCount) // Exponential backoff
           } else {
             setMediaError(true)
+            // Run diagnostics on final failure
+            if (drill.video_file_path) {
+              console.log('[DrillCard] Running storage diagnostics...')
+              runStorageDiagnostics(drill.video_file_path)
+                .then((diagnostics) => {
+                  logDiagnostics(diagnostics)
+                  if (diagnostics.errors.length > 0) {
+                    console.error('[DrillCard] Diagnostic errors found - check Supabase configuration')
+                  }
+                })
+                .catch((diagError) => {
+                  console.error('[DrillCard] Diagnostics failed:', diagError)
+                })
+            }
           }
         }
       } finally {
@@ -111,19 +134,32 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
                 className="h-full w-full object-cover"
                 preload="metadata"
                 onError={(e) => {
-                  console.error('Video load error:', e, 'URL:', mediaUrl, 'Drill:', drill.name)
-                  // Try to refresh URL on error
                   const videoElement = e.currentTarget
+                  const errorDetails = {
+                    error: e,
+                    currentSrc: videoElement.currentSrc,
+                    networkState: videoElement.networkState,
+                    readyState: videoElement.readyState,
+                    errorCode: videoElement.error?.code,
+                    errorMessage: videoElement.error?.message,
+                    url: mediaUrl,
+                    drillName: drill.name,
+                  }
+                  console.error('[DrillCard] Video load error:', errorDetails)
+                  
+                  // Try to refresh URL on error
                   setTimeout(async () => {
                     try {
+                      console.log('[DrillCard] Attempting to refresh video URL...')
                       const newUrl = await storageService.getVideoUrl(drill.video_file_path!, 3600)
                       if (newUrl !== mediaUrl) {
+                        console.log('[DrillCard] Refreshing video URL')
                         videoElement.src = newUrl
                         setMediaUrl(newUrl)
                         setMediaError(false)
                       }
                     } catch (refreshError) {
-                      console.error('Failed to refresh video URL:', refreshError)
+                      console.error('[DrillCard] Failed to refresh video URL:', refreshError)
                       setMediaError(true)
                     }
                   }, 1000)
@@ -155,19 +191,31 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
               className="h-full w-full object-cover"
               loading="lazy"
               onError={(e) => {
-                console.error('Image load error:', e, 'URL:', mediaUrl, 'Drill:', drill.name)
-                // Try to refresh URL on error
                 const imgElement = e.currentTarget
+                const errorDetails = {
+                  error: e,
+                  currentSrc: imgElement.currentSrc,
+                  naturalWidth: imgElement.naturalWidth,
+                  naturalHeight: imgElement.naturalHeight,
+                  complete: imgElement.complete,
+                  url: mediaUrl,
+                  drillName: drill.name,
+                }
+                console.error('[DrillCard] Image load error:', errorDetails)
+                
+                // Try to refresh URL on error
                 setTimeout(async () => {
                   try {
+                    console.log('[DrillCard] Attempting to refresh image URL...')
                     const newUrl = await storageService.getVideoUrl(drill.video_file_path!, 3600)
                     if (newUrl !== mediaUrl) {
+                      console.log('[DrillCard] Refreshing image URL')
                       imgElement.src = newUrl
                       setMediaUrl(newUrl)
                       setMediaError(false)
                     }
                   } catch (refreshError) {
-                    console.error('Failed to refresh image URL:', refreshError)
+                    console.error('[DrillCard] Failed to refresh image URL:', refreshError)
                     setMediaError(true)
                   }
                 }, 1000)

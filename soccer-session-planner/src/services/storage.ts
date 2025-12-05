@@ -57,18 +57,25 @@ export const storageService = {
   async getVideoUrl(path: string, expiresInSeconds = 60): Promise<string> {
     const cleanPath = path.startsWith('/') ? path.slice(1) : path
     
+    // Check authentication state
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+    if (sessionError) {
+      console.error('Error getting auth session:', sessionError)
+    }
+    
+    console.log('[Storage] Getting URL for path:', cleanPath, 'Authenticated:', !!session, 'iOS:', isIOS())
+    
     // For iOS, try multiple approaches
     if (isIOS()) {
       // Approach 1: Try public URL first (if bucket allows)
       try {
         const publicUrl = await this.getPublicUrl(cleanPath)
         if (publicUrl) {
-          // For iOS, try public URL (no-cors mode won't throw on failure, but that's okay)
-          // We'll let the browser try to load it
+          console.log('[Storage] Using public URL for iOS:', publicUrl)
           return publicUrl
         }
-      } catch {
-        // Continue to signed URL approach
+      } catch (error) {
+        console.log('[Storage] Public URL failed, trying signed URL:', error)
       }
       
       // Approach 2: Use signed URL with longer expiration for iOS
@@ -78,26 +85,38 @@ export const storageService = {
 
     // Use retry logic for signed URLs
     return retryWithBackoff(async () => {
+      console.log('[Storage] Creating signed URL, expires in:', expiresInSeconds, 'seconds')
+      
       const { data, error } = await supabase.storage
         .from('drill-videos')
         .createSignedUrl(cleanPath, expiresInSeconds)
 
       if (error) {
-        console.error('Supabase storage error:', error, 'Path:', cleanPath)
+        console.error('[Storage] Supabase storage error:', {
+          error,
+          message: error.message,
+          statusCode: (error as any).statusCode,
+          path: cleanPath,
+          authenticated: !!session,
+        })
         throw error
       }
       
       if (!data?.signedUrl) {
+        console.error('[Storage] No signed URL in response:', data)
         throw new Error('No signed URL returned from Supabase')
       }
       
       // Ensure URL is properly formatted
       const url = data.signedUrl.trim()
+      console.log('[Storage] Generated signed URL (length:', url.length, '):', url.substring(0, 100) + '...')
       
       // Validate URL format
       try {
-        new URL(url)
-      } catch {
+        const urlObj = new URL(url)
+        console.log('[Storage] URL validated - protocol:', urlObj.protocol, 'host:', urlObj.host)
+      } catch (urlError) {
+        console.error('[Storage] Invalid URL format:', urlError, 'URL:', url)
         throw new Error('Invalid URL format returned from Supabase')
       }
       
