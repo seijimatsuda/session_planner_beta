@@ -15,22 +15,36 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
 
   useEffect(() => {
     let isMounted = true
+    let retryCount = 0
+    const maxRetries = 3
     
-    const loadMedia = async () => {
-      if (!drill.video_file_path || mediaUrl) return
+    const loadMedia = async (retry = false) => {
+      if (!drill.video_file_path) return
+      if (mediaUrl && !retry) return
       
       setIsLoadingMedia(true)
+      
       try {
-        // Use longer expiration for modal viewing (1 hour)
+        // Use longer expiration for modal viewing (1 hour, or 2 hours for iOS)
         const url = await storageService.getVideoUrl(drill.video_file_path, 3600)
         
         if (isMounted) {
           setMediaUrl(url)
+          retryCount = 0
         }
       } catch (error) {
-        console.error('Error loading media:', error)
+        console.error('Error loading media in modal:', error, 'Retry:', retryCount)
+        
+        if (isMounted && retryCount < maxRetries) {
+          retryCount++
+          setTimeout(() => {
+            if (isMounted) {
+              loadMedia(true)
+            }
+          }, 1000 * retryCount)
+        }
       } finally {
-        if (isMounted) {
+        if (isMounted && !retry) {
           setIsLoadingMedia(false)
         }
       }
@@ -96,11 +110,24 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
                       playsInline
                       className="w-full"
                       preload="metadata"
-                      onError={(e) => {
+                      onError={async (e) => {
                         console.error('Video load error in modal:', e, 'URL:', mediaUrl)
+                        const videoElement = e.currentTarget
+                        try {
+                          const newUrl = await storageService.getVideoUrl(drill.video_file_path!, 3600)
+                          if (newUrl !== mediaUrl) {
+                            videoElement.src = newUrl
+                            setMediaUrl(newUrl)
+                          }
+                        } catch (refreshError) {
+                          console.error('Failed to refresh video URL in modal:', refreshError)
+                        }
                       }}
                       onLoadStart={() => {
                         console.log('Video load started in modal for:', drill.name)
+                      }}
+                      onLoadedData={() => {
+                        console.log('Video loaded successfully in modal for:', drill.name)
                       }}
                     />
                   ) : isImage ? (
@@ -109,8 +136,18 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
                       alt={drill.name}
                       className="w-full object-contain"
                       loading="lazy"
-                      onError={(e) => {
+                      onError={async (e) => {
                         console.error('Image load error in modal:', e, 'URL:', mediaUrl)
+                        const imgElement = e.currentTarget
+                        try {
+                          const newUrl = await storageService.getVideoUrl(drill.video_file_path!, 3600)
+                          if (newUrl !== mediaUrl) {
+                            imgElement.src = newUrl
+                            setMediaUrl(newUrl)
+                          }
+                        } catch (refreshError) {
+                          console.error('Failed to refresh image URL in modal:', refreshError)
+                        }
                       }}
                       onLoad={() => {
                         console.log('Image loaded successfully in modal for:', drill.name)
