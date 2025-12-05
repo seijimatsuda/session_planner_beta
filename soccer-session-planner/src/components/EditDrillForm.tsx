@@ -45,21 +45,31 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
 
   // Load current media for preview
   useEffect(() => {
+    let isMounted = true
+    
     const loadCurrentMedia = async () => {
       if (!drill.video_file_path) return
       
       setIsLoadingMedia(true)
       try {
         const url = await storageService.getVideoUrl(drill.video_file_path, 3600)
-        setCurrentMediaUrl(url)
+        if (isMounted) {
+          setCurrentMediaUrl(url)
+        }
       } catch (error) {
         console.error('Error loading current media:', error)
       } finally {
-        setIsLoadingMedia(false)
+        if (isMounted) {
+          setIsLoadingMedia(false)
+        }
       }
     }
 
     loadCurrentMedia()
+    
+    return () => {
+      isMounted = false
+    }
   }, [drill.video_file_path])
 
   const equipment = watch('equipment') ?? []
@@ -149,12 +159,18 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
                 playsInline
                 className="w-full max-h-48 object-contain"
                 preload="metadata"
+                onError={(e) => {
+                  console.error('Video load error in edit form:', e, 'URL:', currentMediaUrl)
+                }}
               />
             ) : isImage ? (
               <img
                 src={currentMediaUrl}
                 alt={drill.name}
                 className="w-full max-h-48 object-contain"
+                onError={(e) => {
+                  console.error('Image load error in edit form:', e, 'URL:', currentMediaUrl)
+                }}
               />
             ) : (
               <div className="flex h-48 items-center justify-center">

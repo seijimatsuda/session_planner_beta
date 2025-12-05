@@ -18,6 +18,8 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
 
   // Auto-load media URL on mount
   useEffect(() => {
+    let isMounted = true
+    
     const loadMedia = async () => {
       if (!drill.video_file_path || mediaUrl) return
       
@@ -25,19 +27,30 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
       setMediaError(false)
       
       try {
-        // Use longer expiration for thumbnail display
+        // Use longer expiration for thumbnail display (1 hour)
         const url = await storageService.getVideoUrl(drill.video_file_path, 3600)
-        setMediaUrl(url)
+        
+        if (isMounted) {
+          setMediaUrl(url)
+        }
       } catch (error) {
         console.error('Error loading media:', error)
-        setMediaError(true)
+        if (isMounted) {
+          setMediaError(true)
+        }
       } finally {
-        setIsLoadingMedia(false)
+        if (isMounted) {
+          setIsLoadingMedia(false)
+        }
       }
     }
 
     loadMedia()
-  }, [drill.video_file_path, mediaUrl])
+    
+    return () => {
+      isMounted = false
+    }
+  }, [drill.video_file_path])
 
   const handleMediaClick = () => {
     if (!drill.video_file_path || !mediaUrl || !isVideo) return
@@ -69,6 +82,10 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
               playsInline
               className="h-full w-full object-cover"
               preload="metadata"
+              onError={(e) => {
+                console.error('Video playback error:', e, 'URL:', mediaUrl)
+                setMediaError(true)
+              }}
             />
           ) : isVideo ? (
             <div className="relative h-full w-full">
@@ -78,6 +95,13 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
                 muted
                 className="h-full w-full object-cover"
                 preload="metadata"
+                onError={(e) => {
+                  console.error('Video load error:', e, 'URL:', mediaUrl)
+                  setMediaError(true)
+                }}
+                onLoadStart={() => {
+                  console.log('Video load started for:', drill.name)
+                }}
               />
               <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
                 <div className="rounded-full bg-white bg-opacity-90 p-4">
@@ -97,6 +121,13 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
               alt={drill.name}
               className="h-full w-full object-cover"
               loading="lazy"
+              onError={(e) => {
+                console.error('Image load error:', e, 'URL:', mediaUrl)
+                setMediaError(true)
+              }}
+              onLoad={() => {
+                console.log('Image loaded successfully for:', drill.name)
+              }}
             />
           ) : (
             <div className="flex h-full items-center justify-center">

@@ -17,12 +17,38 @@ export const storageService = {
   },
 
   async getVideoUrl(path: string, expiresInSeconds = 60): Promise<string> {
-    const { data, error } = await supabase.storage
-      .from('drill-videos')
-      .createSignedUrl(path, expiresInSeconds)
+    try {
+      // Ensure path is properly formatted (no leading slash)
+      const cleanPath = path.startsWith('/') ? path.slice(1) : path
+      
+      const { data, error } = await supabase.storage
+        .from('drill-videos')
+        .createSignedUrl(cleanPath, expiresInSeconds)
 
-    if (error) throw error
-    return data.signedUrl
+      if (error) {
+        console.error('Supabase storage error:', error, 'Path:', cleanPath)
+        throw error
+      }
+      
+      if (!data?.signedUrl) {
+        throw new Error('No signed URL returned from Supabase')
+      }
+      
+      // Ensure URL is properly formatted
+      const url = data.signedUrl.trim()
+      
+      // Validate URL format
+      try {
+        new URL(url)
+      } catch {
+        throw new Error('Invalid URL format returned from Supabase')
+      }
+      
+      return url
+    } catch (error) {
+      console.error('Error creating signed URL:', error, 'Path:', path)
+      throw error
+    }
   },
 
   async deleteVideo(path: string): Promise<void> {

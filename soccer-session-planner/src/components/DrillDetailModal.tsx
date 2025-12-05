@@ -14,24 +14,36 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
   const isImage = drill.video_file_path?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
 
   useEffect(() => {
+    let isMounted = true
+    
     const loadMedia = async () => {
       if (!drill.video_file_path || mediaUrl) return
+      
       setIsLoadingMedia(true)
       try {
-        // Use longer expiration for modal viewing
+        // Use longer expiration for modal viewing (1 hour)
         const url = await storageService.getVideoUrl(drill.video_file_path, 3600)
-        setMediaUrl(url)
+        
+        if (isMounted) {
+          setMediaUrl(url)
+        }
       } catch (error) {
         console.error('Error loading media:', error)
       } finally {
-        setIsLoadingMedia(false)
+        if (isMounted) {
+          setIsLoadingMedia(false)
+        }
       }
     }
 
     if (drill.video_file_path && !mediaUrl && !isLoadingMedia) {
       loadMedia()
     }
-  }, [drill.video_file_path, mediaUrl, isLoadingMedia])
+    
+    return () => {
+      isMounted = false
+    }
+  }, [drill.video_file_path])
 
   return (
     <div
@@ -84,6 +96,12 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
                       playsInline
                       className="w-full"
                       preload="metadata"
+                      onError={(e) => {
+                        console.error('Video load error in modal:', e, 'URL:', mediaUrl)
+                      }}
+                      onLoadStart={() => {
+                        console.log('Video load started in modal for:', drill.name)
+                      }}
                     />
                   ) : isImage ? (
                     <img
@@ -91,6 +109,12 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
                       alt={drill.name}
                       className="w-full object-contain"
                       loading="lazy"
+                      onError={(e) => {
+                        console.error('Image load error in modal:', e, 'URL:', mediaUrl)
+                      }}
+                      onLoad={() => {
+                        console.log('Image loaded successfully in modal for:', drill.name)
+                      }}
                     />
                   ) : null}
                 </div>
