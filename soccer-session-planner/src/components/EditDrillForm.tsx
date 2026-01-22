@@ -12,6 +12,20 @@ interface EditDrillFormProps {
   onSuccess: () => void
 }
 
+// Detect iOS/iPad devices
+const isIOS = () => {
+  if (typeof window === 'undefined') return false
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+}
+
+// Check if video format is compatible with iOS Safari
+const isIOSCompatibleVideo = (path: string | null | undefined): boolean => {
+  if (!path) return true
+  const extension = path.split('.').pop()?.toLowerCase()
+  return ['mp4', 'mov', 'm4v'].includes(extension || '')
+}
+
 export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
   const { user } = useAuth()
   const [mediaFile, setMediaFile] = useState<File | null>(null)
@@ -20,9 +34,11 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [currentMediaUrl, setCurrentMediaUrl] = useState<string | null>(null)
   const [isLoadingMedia, setIsLoadingMedia] = useState(false)
+  const isIOSDevice = isIOS()
 
   const isVideo = drill.video_file_path?.match(/\.(mp4|webm|mkv|mov)$/i)
   const isImage = drill.video_file_path?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+  const hasIncompatibleFormat = isIOSDevice && isVideo && !isIOSCompatibleVideo(drill.video_file_path)
 
   const {
     register,
@@ -149,7 +165,13 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
         <label className="mb-2 block text-sm font-medium text-slate-700">
           Current Media
         </label>
-        {isLoadingMedia ? (
+        {hasIncompatibleFormat ? (
+          <div className="flex h-48 flex-col items-center justify-center rounded-lg border border-orange-200 bg-orange-50">
+            <p className="text-sm font-medium text-orange-600">Video format not supported on iPad/iPhone</p>
+            <p className="mt-2 text-xs text-slate-500">This video was uploaded in a format (WebM/MKV) that iOS cannot play.</p>
+            <p className="mt-1 text-xs text-slate-500">Upload a new MP4 video below to replace it.</p>
+          </div>
+        ) : isLoadingMedia ? (
           <div className="flex h-48 items-center justify-center rounded-lg border border-slate-200 bg-slate-50">
             <p className="text-sm text-slate-500">Loading current media...</p>
           </div>
@@ -194,13 +216,18 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
         </label>
         <input
           type="file"
-          accept="image/*,video/*"
+          accept={isIOSDevice ? "image/*,video/mp4,video/quicktime,.mp4,.mov,.m4v" : "image/*,video/*"}
           onChange={(event) => setMediaFile(event.target.files?.[0] ?? null)}
           className="w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-blue-600 hover:file:bg-blue-100"
         />
         <p className="mt-2 text-xs text-slate-500">
           Leave empty to keep the current media. Upload a new file to replace it.
         </p>
+        {isIOSDevice && (
+          <p className="mt-1 text-xs text-orange-600">
+            On iPad/iPhone, only MP4 and MOV videos are supported.
+          </p>
+        )}
         {mediaFile && (
           <p className="mt-1 text-xs text-green-600">
             Selected: {mediaFile.name} ({(mediaFile.size / 1024 / 1024).toFixed(2)} MB)

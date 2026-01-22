@@ -7,11 +7,29 @@ interface DrillDetailModalProps {
   onClose: () => void
 }
 
+// Detect iOS/iPad devices
+const isIOS = () => {
+  if (typeof window === 'undefined') return false
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+}
+
+// Check if video format is compatible with iOS Safari
+const isIOSCompatibleVideo = (path: string | null | undefined): boolean => {
+  if (!path) return true
+  const extension = path.split('.').pop()?.toLowerCase()
+  return ['mp4', 'mov', 'm4v'].includes(extension || '')
+}
+
 export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
   const [mediaUrl, setMediaUrl] = useState<string | null>(null)
   const [isLoadingMedia, setIsLoadingMedia] = useState(false)
   const isVideo = drill.video_file_path?.match(/\.(mp4|webm|mkv|mov)$/i)
   const isImage = drill.video_file_path?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+
+  // Check for iOS format incompatibility
+  const isIOSDevice = isIOS()
+  const hasIncompatibleFormat = isIOSDevice && isVideo && !isIOSCompatibleVideo(drill.video_file_path)
 
   useEffect(() => {
     let isMounted = true
@@ -97,7 +115,13 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
           {/* Media */}
           {drill.video_file_path && (
             <div className="mb-6">
-              {isLoadingMedia ? (
+              {hasIncompatibleFormat ? (
+                <div className="flex h-64 flex-col items-center justify-center rounded-lg bg-orange-50">
+                  <p className="text-sm font-medium text-orange-600">Video format not supported on iPad/iPhone</p>
+                  <p className="mt-2 text-xs text-slate-500">This video was uploaded in a format (WebM/MKV) that iOS cannot play.</p>
+                  <p className="mt-1 text-xs text-slate-500">Please re-upload as MP4 to view on this device.</p>
+                </div>
+              ) : isLoadingMedia ? (
                 <div className="flex h-64 items-center justify-center rounded-lg bg-slate-100">
                   <p className="text-sm text-slate-500">Loading media...</p>
                 </div>
@@ -108,8 +132,11 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
                       src={mediaUrl}
                       controls
                       playsInline
+                      // @ts-ignore - webkit-playsinline is needed for older iOS Safari
+                      webkit-playsinline="true"
+                      x-webkit-airplay="allow"
                       className="w-full"
-                      preload="metadata"
+                      preload="auto"
                       onError={async (e) => {
                         console.error('Video load error in modal:', e, 'URL:', mediaUrl)
                         const videoElement = e.currentTarget

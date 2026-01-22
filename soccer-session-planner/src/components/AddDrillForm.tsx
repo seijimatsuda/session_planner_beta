@@ -10,9 +10,17 @@ interface AddDrillFormProps {
   onSuccess: () => void
 }
 
+// Detect iOS/iPad devices
+const isIOS = () => {
+  if (typeof window === 'undefined') return false
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+}
+
 export function AddDrillForm({ onSuccess }: AddDrillFormProps) {
   const { user } = useAuth()
   const [mediaFile, setMediaFile] = useState<File | null>(null)
+  const isIOSDevice = isIOS()
   const [equipmentInput, setEquipmentInput] = useState('')
   const [tagInput, setTagInput] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
@@ -109,7 +117,7 @@ export function AddDrillForm({ onSuccess }: AddDrillFormProps) {
         </label>
         <input
           type="file"
-          accept="image/*,video/*"
+          accept={isIOSDevice ? "image/*,video/mp4,video/quicktime,.mp4,.mov,.m4v" : "image/*,video/*"}
           onChange={(event) => setMediaFile(event.target.files?.[0] ?? null)}
           className="w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-blue-600 hover:file:bg-blue-100"
           required
@@ -117,6 +125,11 @@ export function AddDrillForm({ onSuccess }: AddDrillFormProps) {
         <p className="mt-2 text-xs text-slate-500">
           Upload a screenshot or video of the drill being done. This will be used to visualize the drill in your library.
         </p>
+        {isIOSDevice && (
+          <p className="mt-1 text-xs text-orange-600">
+            On iPad/iPhone, only MP4 and MOV videos are supported.
+          </p>
+        )}
         {mediaFile && (
           <p className="mt-1 text-xs text-green-600">
             Selected: {mediaFile.name} ({(mediaFile.size / 1024 / 1024).toFixed(2)} MB)

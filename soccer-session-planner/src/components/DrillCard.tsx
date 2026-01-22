@@ -9,6 +9,21 @@ interface DrillCardProps {
   onDelete: (id: string) => void
 }
 
+// Detect iOS/iPad devices
+const isIOS = () => {
+  if (typeof window === 'undefined') return false
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+         (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
+}
+
+// Check if video format is compatible with iOS Safari
+// iOS only supports: MP4 (H.264), MOV, M4V - NOT WebM, MKV, AVI
+const isIOSCompatibleVideo = (path: string | null | undefined): boolean => {
+  if (!path) return true
+  const extension = path.split('.').pop()?.toLowerCase()
+  return ['mp4', 'mov', 'm4v'].includes(extension || '')
+}
+
 export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
   const [showVideo, setShowVideo] = useState(false)
   const [mediaUrl, setMediaUrl] = useState<string | null>(null)
@@ -16,6 +31,10 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
   const [mediaError, setMediaError] = useState(false)
   const isVideo = drill.video_file_path?.match(/\.(mp4|webm|mkv|mov)$/i)
   const isImage = drill.video_file_path?.match(/\.(jpg|jpeg|png|gif|webp)$/i)
+
+  // Check for iOS format incompatibility
+  const isIOSDevice = isIOS()
+  const hasIncompatibleFormat = isIOSDevice && isVideo && !isIOSCompatibleVideo(drill.video_file_path)
 
   // Auto-load media URL on mount with retry logic
   useEffect(() => {
@@ -108,6 +127,11 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
           <div className="flex h-full items-center justify-center">
             <span className="text-sm text-slate-500">Loading...</span>
           </div>
+        ) : hasIncompatibleFormat ? (
+          <div className="flex h-full flex-col items-center justify-center p-4 text-center">
+            <span className="text-sm font-medium text-orange-600">Video format not supported on iPad/iPhone</span>
+            <span className="mt-1 text-xs text-slate-500">Please re-upload as MP4</span>
+          </div>
         ) : mediaError ? (
           <div className="flex h-full items-center justify-center">
             <span className="text-sm text-slate-400">Unable to load media</span>
@@ -118,8 +142,11 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
               src={mediaUrl}
               controls
               playsInline
+              // @ts-ignore - webkit-playsinline is needed for older iOS Safari
+              webkit-playsinline="true"
+              x-webkit-airplay="allow"
               className="h-full w-full object-cover"
-              preload="metadata"
+              preload="auto"
               onError={(e) => {
                 console.error('Video playback error:', e, 'URL:', mediaUrl)
                 setMediaError(true)
@@ -130,9 +157,11 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
               <video
                 src={mediaUrl}
                 playsInline
+                // @ts-ignore - webkit-playsinline is needed for older iOS Safari
+                webkit-playsinline="true"
                 muted
                 className="h-full w-full object-cover"
-                preload="metadata"
+                preload="auto"
                 onError={(e) => {
                   const videoElement = e.currentTarget
                   const errorDetails = {

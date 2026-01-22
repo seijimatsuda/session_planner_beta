@@ -1,5 +1,8 @@
 import { supabase } from '../lib/supabase'
 
+// Get backend URL from environment variable
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL || ''
+
 // Detect if running on iOS/iPad
 const isIOS = () => {
   if (typeof window === 'undefined') return false
@@ -7,21 +10,13 @@ const isIOS = () => {
          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)
 }
 
-// Retry function with exponential backoff
-async function retryWithBackoff<T>(
-  fn: () => Promise<T>,
-  maxRetries = 3,
-  delay = 1000
-): Promise<T> {
-  for (let i = 0; i < maxRetries; i++) {
-    try {
-      return await fn()
-    } catch (error) {
-      if (i === maxRetries - 1) throw error
-      await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)))
-    }
+// Get authentication token for backend requests
+async function getAuthToken(): Promise<string> {
+  const { data: { session }, error } = await supabase.auth.getSession()
+  if (error || !session?.access_token) {
+    throw new Error('Not authenticated')
   }
-  throw new Error('Max retries exceeded')
+  return session.access_token
 }
 
 export const storageService = {
@@ -56,6 +51,29 @@ export const storageService = {
 
   async getVideoUrl(path: string, expiresInSeconds = 60): Promise<string> {
     const cleanPath = path.startsWith('/') ? path.slice(1) : path
+
+    console.log('[Storage] Getting URL for path:', cleanPath, 'iOS:', isIOS(), 'Backend URL:', BACKEND_URL ? 'configured' : 'NOT SET')
+
+    // Use backend proxy if backend URL is configured
+    if (BACKEND_URL) {
+      try {
+        const token = await getAuthToken()
+        // Encode each path segment separately to preserve slashes for Express routing
+        // e.g., "userId/video.mp4" -> "userId/video.mp4" (not "userId%2Fvideo.mp4")
+        const encodedPath = cleanPath.split('/').map(segment => encodeURIComponent(segment)).join('/')
+        const proxyUrl = `${BACKEND_URL}/api/media/${encodedPath}?token=${encodeURIComponent(token)}`
+        console.log('[Storage] Using backend proxy URL:', proxyUrl.substring(0, 100) + '...')
+        return proxyUrl
+      } catch (error) {
+        console.error('[Storage] Failed to get auth token for backend proxy:', error)
+        // Fall through to signed URL approach if backend fails
+      }
+    } else {
+      console.warn('[Storage] VITE_BACKEND_URL not configured - falling back to Supabase signed URLs (may not work on iOS)')
+    }
+    
+    // Fallback to Supabase signed URLs if backend is not configured
+    console.log('[Storage] Falling back to Supabase signed URL')
     
     // Check authentication state
     const { data: { session }, error: sessionError } = await supabase.auth.getSession()
@@ -63,65 +81,34 @@ export const storageService = {
       console.error('Error getting auth session:', sessionError)
     }
     
-    console.log('[Storage] Getting URL for path:', cleanPath, 'Authenticated:', !!session, 'iOS:', isIOS())
-    
-    // For iOS, try multiple approaches
+    // For iOS, use longer expiration
     if (isIOS()) {
-      // Approach 1: Try public URL first (if bucket allows)
-      try {
-        const publicUrl = await this.getPublicUrl(cleanPath)
-        if (publicUrl) {
-          console.log('[Storage] Using public URL for iOS:', publicUrl)
-          return publicUrl
-        }
-      } catch (error) {
-        console.log('[Storage] Public URL failed, trying signed URL:', error)
-      }
-      
-      // Approach 2: Use signed URL with longer expiration for iOS
-      // iOS Safari is more strict, so use longer expiration
       expiresInSeconds = Math.max(expiresInSeconds, 7200) // At least 2 hours for iOS
     }
 
-    // Use retry logic for signed URLs
-    return retryWithBackoff(async () => {
-      console.log('[Storage] Creating signed URL, expires in:', expiresInSeconds, 'seconds')
-      
-      const { data, error } = await supabase.storage
-        .from('drill-videos')
-        .createSignedUrl(cleanPath, expiresInSeconds)
+    const { data, error } = await supabase.storage
+      .from('drill-videos')
+      .createSignedUrl(cleanPath, expiresInSeconds)
 
-      if (error) {
-        console.error('[Storage] Supabase storage error:', {
-          error,
-          message: error.message,
-          statusCode: (error as any).statusCode,
-          path: cleanPath,
-          authenticated: !!session,
-        })
-        throw error
-      }
-      
-      if (!data?.signedUrl) {
-        console.error('[Storage] No signed URL in response:', data)
-        throw new Error('No signed URL returned from Supabase')
-      }
-      
-      // Ensure URL is properly formatted
-      const url = data.signedUrl.trim()
-      console.log('[Storage] Generated signed URL (length:', url.length, '):', url.substring(0, 100) + '...')
-      
-      // Validate URL format
-      try {
-        const urlObj = new URL(url)
-        console.log('[Storage] URL validated - protocol:', urlObj.protocol, 'host:', urlObj.host)
-      } catch (urlError) {
-        console.error('[Storage] Invalid URL format:', urlError, 'URL:', url)
-        throw new Error('Invalid URL format returned from Supabase')
-      }
-      
-      return url
-    }, isIOS() ? 3 : 1) // More retries for iOS
+    if (error) {
+      console.error('[Storage] Supabase storage error:', {
+        error,
+        message: error.message,
+        statusCode: (error as any).statusCode,
+        path: cleanPath,
+        authenticated: !!session,
+      })
+      throw error
+    }
+    
+    if (!data?.signedUrl) {
+      console.error('[Storage] No signed URL in response:', data)
+      throw new Error('No signed URL returned from Supabase')
+    }
+    
+    const url = data.signedUrl.trim()
+    console.log('[Storage] Generated signed URL:', url.substring(0, 100) + '...')
+    return url
   },
 
   async deleteVideo(path: string): Promise<void> {
