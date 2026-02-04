@@ -138,21 +138,43 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
           </div>
         ) : drill.video_file_path && mediaUrl ? (
           showVideo && isVideo ? (
-            <video
-              src={mediaUrl}
-              controls
-              playsInline
-              crossOrigin="anonymous"
-              // @ts-ignore - webkit-playsinline is needed for older iOS Safari
-              webkit-playsinline="true"
-              x-webkit-airplay="allow"
-              className="h-full w-full object-cover"
-              preload="metadata"
-              onError={(e) => {
-                console.error('Video playback error:', e, 'URL:', mediaUrl)
-                setMediaError(true)
-              }}
-            />
+            // Exact same structure as DrillDetailModal
+            <div
+              className="overflow-hidden rounded-lg bg-slate-100 h-full"
+              onClick={(e) => e.stopPropagation()} // Prevent closing when clicking video
+            >
+              <video
+                src={mediaUrl}
+                controls
+                playsInline
+                crossOrigin="anonymous"
+                // @ts-ignore - webkit-playsinline is needed for older iOS Safari
+                webkit-playsinline="true"
+                x-webkit-airplay="allow"
+                className="w-full h-full"
+                preload="metadata"
+                onError={async (e) => {
+                  console.error('Video load error in DrillCard:', e, 'URL:', mediaUrl)
+                  const videoElement = e.currentTarget
+                  try {
+                    const newUrl = await storageService.getVideoUrl(drill.video_file_path!, 3600)
+                    if (newUrl !== mediaUrl) {
+                      videoElement.src = newUrl
+                      setMediaUrl(newUrl)
+                    }
+                  } catch (refreshError) {
+                    console.error('Failed to refresh video URL:', refreshError)
+                    setMediaError(true)
+                  }
+                }}
+                onLoadStart={() => {
+                  console.log('Video load started in DrillCard for:', drill.name)
+                }}
+                onLoadedData={() => {
+                  console.log('Video loaded successfully in DrillCard for:', drill.name)
+                }}
+              />
+            </div>
           ) : isVideo ? (
             <div className="relative h-full w-full bg-slate-800">
               {/* Static thumbnail placeholder - don't load video until user clicks */}
