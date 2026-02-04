@@ -4,6 +4,18 @@ import downloadRouter from './routes/download'
 import mediaRouter from './routes/media'
 
 const app = express()
+
+// Media-specific CORS - MUST expose Range headers for iOS Safari
+app.use('/api/media', cors({
+  origin: true,
+  credentials: true,
+  exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length', 'Content-Type']
+}))
+
+// Mount media router AFTER its CORS middleware
+app.use('/api/media', mediaRouter)
+
+// General CORS for other routes
 app.use(cors())
 app.use(express.json({ limit: '2mb' }))
 
@@ -13,7 +25,6 @@ app.get('/healthz', (_req, res) => {
 
 // Register routes
 app.use('/api/download', downloadRouter)
-app.use('/api/media', mediaRouter)
 
 const port = process.env.PORT ?? 3000
 app.listen(port, () => {
