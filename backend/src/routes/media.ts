@@ -106,7 +106,7 @@ async function getFileInfo(filePath: string): Promise<{ signedUrl: string; fileS
   return { signedUrl: signedData.signedUrl, fileSize, contentType }
 }
 
-router.get('/:path(*)', async (req: Request, res: Response) => {
+router.get('/*path', async (req: Request, res: Response) => {
   try {
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       return res.status(500).json({ error: 'Missing Supabase configuration' })
@@ -206,12 +206,12 @@ router.get('/:path(*)', async (req: Request, res: Response) => {
 })
 
 // OPTIONS for CORS preflight
-router.options('/:path(*)', (_req, res) => {
+router.options('/*path', (_req, res) => {
   res.status(204).end()
 })
 
 // HEAD for iOS probing - returns file metadata without body
-router.head('/:path(*)', async (req: Request, res: Response) => {
+router.head('/*path', async (req: Request, res: Response) => {
   try {
     if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
       return res.status(500).end()
