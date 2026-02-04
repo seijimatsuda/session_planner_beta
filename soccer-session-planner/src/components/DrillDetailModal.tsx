@@ -132,11 +132,12 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
                       src={mediaUrl}
                       controls
                       playsInline
+                      crossOrigin="anonymous"
                       // @ts-ignore - webkit-playsinline is needed for older iOS Safari
                       webkit-playsinline="true"
                       x-webkit-airplay="allow"
                       className="w-full"
-                      preload="auto"
+                      preload="metadata"
                       onError={async (e) => {
                         console.error('Video load error in modal:', e, 'URL:', mediaUrl)
                         const videoElement = e.currentTarget

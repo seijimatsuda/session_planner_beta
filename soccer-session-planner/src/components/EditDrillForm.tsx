@@ -182,6 +182,7 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
                 src={currentMediaUrl}
                 controls
                 playsInline
+                crossOrigin="anonymous"
                 className="w-full max-h-48 object-contain"
                 preload="metadata"
                 onError={(e) => {

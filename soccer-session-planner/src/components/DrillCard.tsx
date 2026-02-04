@@ -142,11 +142,12 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
               src={mediaUrl}
               controls
               playsInline
+              crossOrigin="anonymous"
               // @ts-ignore - webkit-playsinline is needed for older iOS Safari
               webkit-playsinline="true"
               x-webkit-airplay="allow"
               className="h-full w-full object-cover"
-              preload="auto"
+              preload="metadata"
               onError={(e) => {
                 console.error('Video playback error:', e, 'URL:', mediaUrl)
                 setMediaError(true)
@@ -157,11 +158,12 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
               <video
                 src={mediaUrl}
                 playsInline
+                crossOrigin="anonymous"
                 // @ts-ignore - webkit-playsinline is needed for older iOS Safari
                 webkit-playsinline="true"
                 muted
                 className="h-full w-full object-cover"
-                preload="auto"
+                preload="metadata"
                 onError={(e) => {
                   const videoElement = e.currentTarget
                   const errorDetails = {
