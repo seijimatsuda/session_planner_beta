@@ -41,21 +41,21 @@ export function SavedSessions() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-sm text-slate-600">Loading sessions...</div>
+        <div className="text-sm text-slate-400">Loading sessions...</div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
-        <p className="text-lg font-medium text-red-800">Error loading sessions</p>
-        <p className="mt-2 text-sm text-red-600">
+      <div className="rounded-xl border border-slate-600 bg-slate-800 p-8 text-center">
+        <p className="text-lg font-medium text-red-400">Error loading sessions</p>
+        <p className="mt-2 text-sm text-slate-400">
           {error instanceof Error ? error.message : 'An unknown error occurred'}
         </p>
         <button
           onClick={() => queryClient.invalidateQueries({ queryKey: ['sessions'] })}
-          className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+          className="mt-4 rounded-lg bg-slate-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-500"
         >
           Retry
         </button>
@@ -68,14 +68,14 @@ export function SavedSessions() {
       <header>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Saved Sessions</h1>
-            <p className="mt-2 text-sm text-slate-600">
+            <h1 className="text-3xl font-bold text-slate-100">Saved Sessions</h1>
+            <p className="mt-2 text-sm text-slate-400">
               Review, edit, duplicate, or delete your session plans
             </p>
           </div>
           <button
             onClick={() => navigate('/sessions/new')}
-            className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-green-700 sm:w-auto"
+            className="w-full rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow transition hover:bg-slate-200 sm:w-auto"
           >
             + New Session
           </button>
@@ -83,11 +83,11 @@ export function SavedSessions() {
       </header>
 
       {sessions.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
-          <p className="text-lg font-medium text-slate-600">No sessions yet. Create your first session!</p>
+        <div className="rounded-xl border border-dashed border-slate-600 bg-slate-800 p-12 text-center">
+          <p className="text-lg font-medium text-slate-400">No sessions yet. Create your first session!</p>
           <button
             onClick={() => navigate('/sessions/new')}
-            className="mt-4 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700"
+            className="mt-4 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
           >
             Create Your First Session
           </button>
@@ -102,10 +102,10 @@ export function SavedSessions() {
             return (
               <div
                 key={session.id}
-                className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+                className="rounded-xl border border-slate-700 bg-slate-800 p-6 shadow-sm transition-shadow hover:shadow-md"
               >
-                <h3 className="mb-2 text-xl font-semibold text-slate-900">{session.name}</h3>
-                <p className="mb-1 text-sm text-slate-600">
+                <h3 className="mb-2 text-xl font-semibold text-slate-100">{session.name}</h3>
+                <p className="mb-1 text-sm text-slate-400">
                   {drillCount} drill{drillCount !== 1 ? 's' : ''}
                 </p>
                 <p className="mb-1 text-xs text-slate-500">
@@ -121,14 +121,14 @@ export function SavedSessions() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => navigate(`/sessions/${session.id}`)}
-                    className="flex-1 rounded-lg bg-blue-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-blue-700"
+                    className="flex-1 rounded-lg bg-white px-3 py-2 text-sm font-medium text-slate-900 transition hover:bg-slate-200"
                   >
                     View
                   </button>
                   <button
                     onClick={() => duplicateMutation.mutate(session)}
                     disabled={duplicateMutation.isPending}
-                    className="flex-1 rounded-lg bg-yellow-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-yellow-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+                    className="flex-1 rounded-lg bg-slate-600 px-3 py-2 text-sm font-medium text-white transition hover:bg-slate-500 disabled:cursor-not-allowed disabled:bg-slate-700"
                   >
                     {duplicateMutation.isPending ? '...' : 'Duplicate'}
                   </button>
@@ -138,9 +138,9 @@ export function SavedSessions() {
                         deleteMutation.mutate(session.id)
                       }
                     }}
-                    className="rounded-lg bg-red-500 px-4 py-2 text-sm font-medium text-white transition hover:bg-red-600"
+                    className="rounded-lg bg-slate-600 px-4 py-2 text-sm font-medium text-slate-300 transition hover:bg-slate-500 hover:text-red-400"
                   >
-                    🗑️
+                    X
                   </button>
                 </div>
               </div>

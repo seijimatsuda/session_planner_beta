@@ -55,7 +55,7 @@ export function Library() {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <div className="mb-2 text-sm text-slate-600">Loading drills...</div>
+          <div className="mb-2 text-sm text-slate-400">Loading drills...</div>
         </div>
       </div>
     )
@@ -63,14 +63,14 @@ export function Library() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
-        <p className="text-lg font-medium text-red-800">Error loading drills</p>
-        <p className="mt-2 text-sm text-red-600">
+      <div className="rounded-xl border border-slate-600 bg-slate-800 p-8 text-center">
+        <p className="text-lg font-medium text-red-400">Error loading drills</p>
+        <p className="mt-2 text-sm text-slate-400">
           {error instanceof Error ? error.message : 'An unknown error occurred'}
         </p>
         <button
           onClick={() => queryClient.invalidateQueries({ queryKey: ['drills'] })}
-          className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+          className="mt-4 rounded-lg bg-slate-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-500"
         >
           Retry
         </button>
@@ -83,14 +83,14 @@ export function Library() {
       <header>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">Drill Library</h1>
-            <p className="mt-2 text-sm text-slate-600">
+            <h1 className="text-3xl font-bold text-slate-100">Drill Library</h1>
+            <p className="mt-2 text-sm text-slate-400">
               Browse, search, and manage your drill collection
             </p>
           </div>
           <button
             onClick={() => navigate('/drills/new')}
-            className="w-full rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-green-700 sm:w-auto"
+            className="w-full rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow transition hover:bg-slate-200 sm:w-auto"
           >
             + Add Drill
           </button>
@@ -98,10 +98,10 @@ export function Library() {
       </header>
 
       {/* Filters */}
-      <div className="space-y-4 rounded-xl border border-slate-200 bg-white p-4">
+      <div className="space-y-4 rounded-xl border border-slate-700 bg-slate-800 p-4">
         {/* Category Filter */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">Category</label>
+          <label className="mb-2 block text-sm font-medium text-slate-300">Category</label>
           <div className="flex flex-wrap gap-2">
             {categories.map((cat) => (
               <button
@@ -109,8 +109,8 @@ export function Library() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`rounded-lg px-4 py-2 text-sm font-medium capitalize transition ${
                   selectedCategory === cat
-                    ? 'bg-blue-600 text-white shadow'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-white text-slate-900 shadow'
+                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
               >
                 {cat}
@@ -121,21 +121,21 @@ export function Library() {
 
         {/* Search */}
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">Search</label>
+          <label className="mb-2 block text-sm font-medium text-slate-300">Search</label>
           <input
             type="text"
             placeholder="Search by name or tags..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full rounded-lg border border-slate-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="w-full rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-sm text-slate-100 shadow-sm placeholder:text-slate-500 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
           />
         </div>
       </div>
 
       {/* Drill Grid */}
       {filteredDrills.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
-          <p className="text-lg font-medium text-slate-600">
+        <div className="rounded-xl border border-dashed border-slate-600 bg-slate-800 p-12 text-center">
+          <p className="text-lg font-medium text-slate-400">
             {drills.length === 0
               ? 'No drills yet. Add your first drill to get started!'
               : 'No drills match your filters.'}
@@ -143,7 +143,7 @@ export function Library() {
           {drills.length === 0 && (
             <button
               onClick={() => navigate('/drills/new')}
-              className="mt-4 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700"
+              className="mt-4 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
             >
               Add Your First Drill
             </button>

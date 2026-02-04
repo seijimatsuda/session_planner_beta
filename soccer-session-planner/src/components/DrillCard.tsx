@@ -115,32 +115,32 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+    <div className="overflow-hidden rounded-lg border border-slate-700 bg-slate-800 shadow-sm transition-shadow hover:shadow-md">
       {/* Media Thumbnail/Preview */}
       <div
-        className={`relative h-48 w-full overflow-hidden bg-slate-100 ${
+        className={`relative h-48 w-full overflow-hidden bg-slate-700 ${
           isVideo && mediaUrl ? 'cursor-pointer' : ''
         }`}
         onClick={handleMediaClick}
       >
         {isLoadingMedia ? (
           <div className="flex h-full items-center justify-center">
-            <span className="text-sm text-slate-500">Loading...</span>
+            <span className="text-sm text-slate-400">Loading...</span>
           </div>
         ) : hasIncompatibleFormat ? (
           <div className="flex h-full flex-col items-center justify-center p-4 text-center">
-            <span className="text-sm font-medium text-orange-600">Video format not supported on iPad/iPhone</span>
-            <span className="mt-1 text-xs text-slate-500">Please re-upload as MP4</span>
+            <span className="text-sm font-medium text-orange-400">Video format not supported on iPad/iPhone</span>
+            <span className="mt-1 text-xs text-slate-400">Please re-upload as MP4</span>
           </div>
         ) : mediaError ? (
           <div className="flex h-full items-center justify-center">
-            <span className="text-sm text-slate-400">Unable to load media</span>
+            <span className="text-sm text-slate-500">Unable to load media</span>
           </div>
         ) : drill.video_file_path && mediaUrl ? (
           showVideo && isVideo ? (
             // Exact same structure as DrillDetailModal
             <div
-              className="overflow-hidden rounded-lg bg-slate-100 h-full"
+              className="overflow-hidden rounded-lg bg-slate-700 h-full"
               onClick={(e) => e.stopPropagation()} // Prevent closing when clicking video
             >
               <video
@@ -176,10 +176,10 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
               />
             </div>
           ) : isVideo ? (
-            <div className="relative h-full w-full bg-slate-800">
+            <div className="relative h-full w-full bg-slate-700">
               {/* Static thumbnail placeholder - don't load video until user clicks */}
               <div className="absolute inset-0 flex items-center justify-center">
-                <div className="rounded-full bg-white bg-opacity-90 p-4">
+                <div className="rounded-full bg-slate-100 bg-opacity-90 p-4">
                   <svg
                     className="h-12 w-12 text-slate-900"
                     fill="currentColor"
@@ -189,7 +189,7 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
                   </svg>
                 </div>
               </div>
-              <p className="absolute bottom-2 left-2 text-xs text-white/70">Tap to play</p>
+              <p className="absolute bottom-2 left-2 text-xs text-slate-400">Tap to play</p>
             </div>
           ) : isImage ? (
             <img
@@ -234,12 +234,12 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
             />
           ) : (
             <div className="flex h-full items-center justify-center">
-              <span className="text-sm text-slate-400">Media unavailable</span>
+              <span className="text-sm text-slate-500">Media unavailable</span>
             </div>
           )
         ) : (
           <div className="flex h-full items-center justify-center">
-            <span className="text-sm text-slate-400">No media available</span>
+            <span className="text-sm text-slate-500">No media available</span>
           </div>
         )}
       </div>
@@ -247,14 +247,14 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
       {/* Drill Info */}
       <div className="p-4">
         <div className="mb-2 flex items-start justify-between">
-          <h3 className="text-lg font-semibold text-slate-900">{drill.name}</h3>
-          <span className="ml-2 rounded-full bg-blue-100 px-2 py-1 text-xs font-medium text-blue-800 capitalize">
+          <h3 className="text-lg font-semibold text-slate-100">{drill.name}</h3>
+          <span className="ml-2 rounded-full bg-slate-700 px-2 py-1 text-xs font-medium text-slate-300 capitalize">
             {drill.category}
           </span>
         </div>
 
         {drill.num_players && (
-          <p className="mb-2 text-sm text-slate-600">Players: {drill.num_players}</p>
+          <p className="mb-2 text-sm text-slate-400">Players: {drill.num_players}</p>
         )}
 
         {drill.equipment.length > 0 && (
@@ -264,7 +264,7 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
               {drill.equipment.map((item, i) => (
                 <span
                   key={i}
-                  className="rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-700"
+                  className="rounded bg-slate-700 px-2 py-0.5 text-xs text-slate-300"
                 >
                   {item}
                 </span>
@@ -280,7 +280,7 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
               {drill.tags.map((tag, i) => (
                 <span
                   key={i}
-                  className="rounded bg-blue-50 px-2 py-0.5 text-xs text-blue-700"
+                  className="rounded bg-slate-700 px-2 py-0.5 text-xs text-slate-300"
                 >
                   {tag}
                 </span>
@@ -300,7 +300,7 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
         <div className="mt-3 flex gap-2">
           <button
             onClick={() => onEdit(drill)}
-            className="flex-1 rounded-lg bg-yellow-500 px-3 py-3 text-sm font-medium text-white transition hover:bg-yellow-600 touch-manipulation min-h-[44px]"
+            className="flex-1 rounded-lg bg-slate-600 px-3 py-3 text-sm font-medium text-white transition hover:bg-slate-500 touch-manipulation min-h-[44px]"
           >
             Edit
           </button>
@@ -310,7 +310,7 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
                 onDelete(drill.id)
               }
             }}
-            className="flex-1 rounded-lg bg-red-500 px-3 py-3 text-sm font-medium text-white transition hover:bg-red-600 touch-manipulation min-h-[44px]"
+            className="flex-1 rounded-lg bg-slate-600 px-3 py-3 text-sm font-medium text-slate-300 transition hover:bg-slate-500 hover:text-red-400 touch-manipulation min-h-[44px]"
           >
             Delete
           </button>

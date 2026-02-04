@@ -162,21 +162,21 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">
+        <label className="mb-2 block text-sm font-medium text-slate-300">
           Current Media
         </label>
         {hasIncompatibleFormat ? (
-          <div className="flex h-48 flex-col items-center justify-center rounded-lg border border-orange-200 bg-orange-50">
-            <p className="text-sm font-medium text-orange-600">Video format not supported on iPad/iPhone</p>
-            <p className="mt-2 text-xs text-slate-500">This video was uploaded in a format (WebM/MKV) that iOS cannot play.</p>
-            <p className="mt-1 text-xs text-slate-500">Upload a new MP4 video below to replace it.</p>
+          <div className="flex h-48 flex-col items-center justify-center rounded-lg border border-slate-600 bg-slate-700">
+            <p className="text-sm font-medium text-orange-400">Video format not supported on iPad/iPhone</p>
+            <p className="mt-2 text-xs text-slate-400">This video was uploaded in a format (WebM/MKV) that iOS cannot play.</p>
+            <p className="mt-1 text-xs text-slate-400">Upload a new MP4 video below to replace it.</p>
           </div>
         ) : isLoadingMedia ? (
-          <div className="flex h-48 items-center justify-center rounded-lg border border-slate-200 bg-slate-50">
-            <p className="text-sm text-slate-500">Loading current media...</p>
+          <div className="flex h-48 items-center justify-center rounded-lg border border-slate-600 bg-slate-700">
+            <p className="text-sm text-slate-400">Loading current media...</p>
           </div>
         ) : currentMediaUrl ? (
-          <div className="rounded-lg border border-slate-200 bg-slate-50 overflow-hidden">
+          <div className="rounded-lg border border-slate-600 bg-slate-700 overflow-hidden">
             {isVideo ? (
               <video
                 src={currentMediaUrl}
@@ -200,95 +200,95 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
               />
             ) : (
               <div className="flex h-48 items-center justify-center">
-                <p className="text-sm text-slate-500">Media preview unavailable</p>
+                <p className="text-sm text-slate-400">Media preview unavailable</p>
               </div>
             )}
           </div>
         ) : (
-          <div className="flex h-48 items-center justify-center rounded-lg border border-slate-200 bg-slate-50">
-            <p className="text-sm text-slate-500">No media available</p>
+          <div className="flex h-48 items-center justify-center rounded-lg border border-slate-600 bg-slate-700">
+            <p className="text-sm text-slate-400">No media available</p>
           </div>
         )}
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">
+        <label className="mb-2 block text-sm font-medium text-slate-300">
           Replace Media (optional)
         </label>
         <input
           type="file"
           accept={isIOSDevice ? "image/*,video/mp4,video/quicktime,.mp4,.mov,.m4v" : "image/*,video/*"}
           onChange={(event) => setMediaFile(event.target.files?.[0] ?? null)}
-          className="w-full text-sm text-slate-600 file:mr-4 file:rounded-md file:border-0 file:bg-blue-50 file:px-3 file:py-2 file:text-blue-600 hover:file:bg-blue-100"
+          className="w-full text-sm text-slate-400 file:mr-4 file:rounded-md file:border-0 file:bg-slate-700 file:px-3 file:py-2 file:text-slate-300 hover:file:bg-slate-600"
         />
         <p className="mt-2 text-xs text-slate-500">
           Leave empty to keep the current media. Upload a new file to replace it.
         </p>
         {isIOSDevice && (
-          <p className="mt-1 text-xs text-orange-600">
+          <p className="mt-1 text-xs text-orange-400">
             On iPad/iPhone, only MP4 and MOV videos are supported.
           </p>
         )}
         {mediaFile && (
-          <p className="mt-1 text-xs text-green-600">
+          <p className="mt-1 text-xs text-green-400">
             Selected: {mediaFile.name} ({(mediaFile.size / 1024 / 1024).toFixed(2)} MB)
           </p>
         )}
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">Video URL (optional)</label>
+        <label className="mb-2 block text-sm font-medium text-slate-300">Video URL (optional)</label>
         <input
           type="url"
           placeholder="https://youtube.com/watch?v=... (optional reference link)"
           {...register('video_url')}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="w-full rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100 shadow-sm placeholder:text-slate-500 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
         />
-        {errors.video_url ? <p className="mt-1 text-sm text-red-500">{errors.video_url.message}</p> : null}
+        {errors.video_url ? <p className="mt-1 text-sm text-red-400">{errors.video_url.message}</p> : null}
         <p className="mt-2 text-xs text-slate-500">
           Optionally provide a reference link to the source video (e.g., YouTube, Instagram) for this drill.
         </p>
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">Drill Name</label>
+        <label className="mb-2 block text-sm font-medium text-slate-300">Drill Name</label>
         <input
           type="text"
           placeholder="Ball Mastery Drill"
           {...register('name')}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="w-full rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100 shadow-sm placeholder:text-slate-500 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
         />
-        {errors.name ? <p className="mt-1 text-sm text-red-500">{errors.name.message}</p> : null}
+        {errors.name ? <p className="mt-1 text-sm text-red-400">{errors.name.message}</p> : null}
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">Category</label>
+        <label className="mb-2 block text-sm font-medium text-slate-300">Category</label>
         <select
           {...register('category')}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="w-full rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100 shadow-sm focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
         >
           <option value="activation">Activation</option>
           <option value="dribbling">Dribbling</option>
           <option value="passing">Passing</option>
           <option value="shooting">Shooting</option>
         </select>
-        {errors.category ? <p className="mt-1 text-sm text-red-500">{errors.category.message}</p> : null}
+        {errors.category ? <p className="mt-1 text-sm text-red-400">{errors.category.message}</p> : null}
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">Number of Players (optional)</label>
+        <label className="mb-2 block text-sm font-medium text-slate-300">Number of Players (optional)</label>
         <input
           type="number"
           min={1}
           max={50}
           {...register('num_players', { valueAsNumber: true })}
-          className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+          className="w-full rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100 shadow-sm placeholder:text-slate-500 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
         />
-        {errors.num_players ? <p className="mt-1 text-sm text-red-500">{errors.num_players.message}</p> : null}
+        {errors.num_players ? <p className="mt-1 text-sm text-red-400">{errors.num_players.message}</p> : null}
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">Equipment</label>
+        <label className="mb-2 block text-sm font-medium text-slate-300">Equipment</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -301,12 +301,12 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
               }
             }}
             placeholder="e.g., cones, balls"
-            className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="flex-1 rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100 shadow-sm placeholder:text-slate-500 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
           />
           <button
             type="button"
             onClick={addEquipment}
-            className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-300"
+            className="rounded-lg bg-slate-600 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-500"
           >
             Add
           </button>
@@ -316,10 +316,10 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
             {equipment.map((item, index) => (
               <span
                 key={index}
-                className="flex items-center gap-2 rounded-full bg-slate-200 px-3 py-1 text-xs text-slate-700"
+                className="flex items-center gap-2 rounded-full bg-slate-700 px-3 py-1 text-xs text-slate-300"
               >
                 {item}
-                <button type="button" onClick={() => removeEquipment(index)} className="text-slate-500 hover:text-slate-700">
+                <button type="button" onClick={() => removeEquipment(index)} className="text-slate-400 hover:text-slate-200">
                   ×
                 </button>
               </span>
@@ -329,7 +329,7 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
       </div>
 
       <div>
-        <label className="mb-2 block text-sm font-medium text-slate-700">Tags</label>
+        <label className="mb-2 block text-sm font-medium text-slate-300">Tags</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -342,12 +342,12 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
               }
             }}
             placeholder="e.g., beginner, coordination"
-            className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="flex-1 rounded-lg border border-slate-600 bg-slate-700 px-3 py-2 text-sm text-slate-100 shadow-sm placeholder:text-slate-500 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
           />
           <button
             type="button"
             onClick={addTag}
-            className="rounded-lg bg-slate-200 px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-300"
+            className="rounded-lg bg-slate-600 px-3 py-2 text-sm font-medium text-slate-200 transition hover:bg-slate-500"
           >
             Add
           </button>
@@ -357,10 +357,10 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
             {tags.map((tag, index) => (
               <span
                 key={index}
-                className="flex items-center gap-2 rounded-full bg-blue-100 px-3 py-1 text-xs text-blue-700"
+                className="flex items-center gap-2 rounded-full bg-slate-700 px-3 py-1 text-xs text-slate-300"
               >
                 {tag}
-                <button type="button" onClick={() => removeTag(index)} className="text-blue-500 hover:text-blue-700">
+                <button type="button" onClick={() => removeTag(index)} className="text-slate-400 hover:text-slate-200">
                   ×
                 </button>
               </span>
@@ -373,14 +373,14 @@ export function EditDrillForm({ drill, onSuccess }: EditDrillFormProps) {
         <button
           type="button"
           onClick={onSuccess}
-          className="flex-1 rounded-lg bg-slate-500 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-slate-600"
+          className="flex-1 rounded-lg bg-slate-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-slate-500"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-green-400"
+          className="flex-1 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:bg-slate-400"
         >
           {isSubmitting ? 'Updating Drill...' : 'Update Drill'}
         </button>

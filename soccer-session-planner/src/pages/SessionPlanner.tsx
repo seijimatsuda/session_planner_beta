@@ -179,21 +179,21 @@ export function SessionPlanner() {
   if (isLoadingSession) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-sm text-slate-600">Loading session...</div>
+        <div className="text-sm text-slate-400">Loading session...</div>
       </div>
     )
   }
 
   if (drillsError) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
-        <p className="text-lg font-medium text-red-800">Error loading drills</p>
-        <p className="mt-2 text-sm text-red-600">
+      <div className="rounded-xl border border-slate-600 bg-slate-800 p-8 text-center">
+        <p className="text-lg font-medium text-red-400">Error loading drills</p>
+        <p className="mt-2 text-sm text-slate-400">
           {drillsError instanceof Error ? drillsError.message : 'An unknown error occurred'}
         </p>
         <button
           onClick={() => queryClient.invalidateQueries({ queryKey: ['drills'] })}
-          className="mt-4 rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700"
+          className="mt-4 rounded-lg bg-slate-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-500"
         >
           Retry
         </button>
@@ -204,8 +204,8 @@ export function SessionPlanner() {
   return (
     <div className="space-y-6">
       <header>
-        <h1 className="text-3xl font-bold text-slate-900">Plan Session</h1>
-        <p className="mt-2 text-sm text-slate-600">
+        <h1 className="text-3xl font-bold text-slate-100">Plan Session</h1>
+        <p className="mt-2 text-sm text-slate-400">
           {id ? 'Edit your session plan' : 'Drag drills into the grid to plan your training session'}
         </p>
       </header>
@@ -221,8 +221,8 @@ export function SessionPlanner() {
         </div>
 
         {/* Drill Library */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
-          <h2 className="mb-4 text-xl font-bold text-slate-900">Drill Library</h2>
+        <div className="rounded-xl border border-slate-700 bg-slate-800 p-6">
+          <h2 className="mb-4 text-xl font-bold text-slate-100">Drill Library</h2>
 
           {/* Category Filter */}
           <div className="mb-4 flex flex-wrap gap-2">
@@ -232,8 +232,8 @@ export function SessionPlanner() {
                 onClick={() => setSelectedCategory(cat as Category | 'all')}
                 className={`rounded-lg px-4 py-2 text-sm font-medium capitalize transition ${
                   selectedCategory === cat
-                    ? 'bg-blue-600 text-white shadow'
-                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    ? 'bg-white text-slate-900 shadow'
+                    : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
                 }`}
               >
                 {cat}
@@ -243,7 +243,7 @@ export function SessionPlanner() {
 
           {/* Drills Grid */}
           {filteredDrills.length === 0 ? (
-            <div className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-8 text-center text-sm text-slate-500">
+            <div className="rounded-lg border border-dashed border-slate-600 bg-slate-700 p-8 text-center text-sm text-slate-400">
               No drills available. Add some drills first!
             </div>
           ) : (
@@ -261,29 +261,29 @@ export function SessionPlanner() {
 
         <DragOverlay>
           {activeDrill ? (
-            <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-lg opacity-90">
-              <h4 className="font-medium text-slate-900">{activeDrill.name}</h4>
+            <div className="rounded-lg border border-slate-600 bg-slate-800 p-3 shadow-lg opacity-90">
+              <h4 className="font-medium text-slate-100">{activeDrill.name}</h4>
             </div>
           ) : null}
         </DragOverlay>
       </DndContext>
 
       {/* Save Session */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="mb-4 text-xl font-bold text-slate-900">Save Session</h2>
+      <div className="rounded-xl border border-slate-700 bg-slate-800 p-6">
+        <h2 className="mb-4 text-xl font-bold text-slate-100">Save Session</h2>
         <div className="flex flex-col gap-4 sm:flex-row">
           <input
             type="text"
             value={sessionName}
             onChange={(e) => setSessionName(e.target.value)}
             placeholder="Enter session name..."
-            className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm shadow-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-200"
+            className="flex-1 rounded-lg border border-slate-600 bg-slate-700 px-4 py-2 text-sm text-slate-100 shadow-sm placeholder:text-slate-500 focus:border-slate-500 focus:outline-none focus:ring-2 focus:ring-slate-600"
           />
           <div className="flex gap-2">
             <button
               onClick={handleSave}
               disabled={saveMutation.isPending}
-              className="flex-1 rounded-lg bg-green-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-green-700 disabled:cursor-not-allowed disabled:bg-slate-300 sm:px-6"
+              className="flex-1 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200 disabled:cursor-not-allowed disabled:bg-slate-400 sm:px-6"
             >
               {saveMutation.isPending
                 ? 'Saving...'
@@ -293,7 +293,7 @@ export function SessionPlanner() {
             </button>
             <button
               onClick={() => navigate('/sessions')}
-              className="rounded-lg bg-slate-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-600 sm:px-6"
+              className="rounded-lg bg-slate-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-500 sm:px-6"
             >
               Cancel
             </button>

@@ -79,30 +79,30 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70 p-4"
       onClick={onClose}
     >
       <div
-        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-white shadow-xl"
+        className="max-h-[90vh] w-full max-w-2xl overflow-y-auto rounded-xl bg-slate-800 shadow-xl"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 border-b border-slate-200 bg-white p-6">
+        <div className="sticky top-0 border-b border-slate-700 bg-slate-800 p-6">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-slate-900">{drill.name}</h2>
+              <h2 className="text-2xl font-bold text-slate-100">{drill.name}</h2>
               <div className="mt-2 flex flex-wrap items-center gap-2">
-                <span className="rounded-full bg-blue-100 px-3 py-1 text-sm font-medium text-blue-800 capitalize">
+                <span className="rounded-full bg-slate-700 px-3 py-1 text-sm font-medium text-slate-300 capitalize">
                   {drill.category}
                 </span>
                 {drill.num_players && (
-                  <span className="text-sm text-slate-600">Players: {drill.num_players}</span>
+                  <span className="text-sm text-slate-400">Players: {drill.num_players}</span>
                 )}
               </div>
             </div>
             <button
               onClick={onClose}
-              className="ml-4 flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-600 touch-manipulation"
+              className="ml-4 flex h-11 w-11 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-700 hover:text-slate-200 touch-manipulation"
               aria-label="Close"
             >
               ✕
@@ -116,17 +116,17 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
           {drill.video_file_path && (
             <div className="mb-6">
               {hasIncompatibleFormat ? (
-                <div className="flex h-64 flex-col items-center justify-center rounded-lg bg-orange-50">
-                  <p className="text-sm font-medium text-orange-600">Video format not supported on iPad/iPhone</p>
-                  <p className="mt-2 text-xs text-slate-500">This video was uploaded in a format (WebM/MKV) that iOS cannot play.</p>
-                  <p className="mt-1 text-xs text-slate-500">Please re-upload as MP4 to view on this device.</p>
+                <div className="flex h-64 flex-col items-center justify-center rounded-lg bg-slate-700">
+                  <p className="text-sm font-medium text-orange-400">Video format not supported on iPad/iPhone</p>
+                  <p className="mt-2 text-xs text-slate-400">This video was uploaded in a format (WebM/MKV) that iOS cannot play.</p>
+                  <p className="mt-1 text-xs text-slate-400">Please re-upload as MP4 to view on this device.</p>
                 </div>
               ) : isLoadingMedia ? (
-                <div className="flex h-64 items-center justify-center rounded-lg bg-slate-100">
-                  <p className="text-sm text-slate-500">Loading media...</p>
+                <div className="flex h-64 items-center justify-center rounded-lg bg-slate-700">
+                  <p className="text-sm text-slate-400">Loading media...</p>
                 </div>
               ) : mediaUrl ? (
-                <div className="overflow-hidden rounded-lg bg-slate-100">
+                <div className="overflow-hidden rounded-lg bg-slate-700">
                   {isVideo ? (
                     <video
                       src={mediaUrl}
@@ -184,8 +184,8 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
                   ) : null}
                 </div>
               ) : (
-                <div className="flex h-64 items-center justify-center rounded-lg bg-slate-100">
-                  <p className="text-sm text-slate-500">Unable to load media</p>
+                <div className="flex h-64 items-center justify-center rounded-lg bg-slate-700">
+                  <p className="text-sm text-slate-400">Unable to load media</p>
                 </div>
               )}
             </div>
@@ -194,12 +194,12 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
           {/* Equipment */}
           {drill.equipment.length > 0 && (
             <div className="mb-4">
-              <h3 className="mb-2 text-sm font-semibold text-slate-700">Equipment</h3>
+              <h3 className="mb-2 text-sm font-semibold text-slate-300">Equipment</h3>
               <div className="flex flex-wrap gap-2">
                 {drill.equipment.map((item, i) => (
                   <span
                     key={i}
-                    className="rounded bg-slate-100 px-3 py-1 text-sm text-slate-700"
+                    className="rounded bg-slate-700 px-3 py-1 text-sm text-slate-300"
                   >
                     {item}
                   </span>
@@ -211,12 +211,12 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
           {/* Tags */}
           {drill.tags.length > 0 && (
             <div className="mb-4">
-              <h3 className="mb-2 text-sm font-semibold text-slate-700">Tags</h3>
+              <h3 className="mb-2 text-sm font-semibold text-slate-300">Tags</h3>
               <div className="flex flex-wrap gap-2">
                 {drill.tags.map((tag, i) => (
                   <span
                     key={i}
-                    className="rounded bg-blue-50 px-3 py-1 text-sm text-blue-700"
+                    className="rounded bg-slate-700 px-3 py-1 text-sm text-slate-300"
                   >
                     {tag}
                   </span>
@@ -239,7 +239,7 @@ export function DrillDetailModal({ drill, onClose }: DrillDetailModalProps) {
                 href={drill.video_url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm text-slate-300 hover:text-white hover:underline"
               >
                 View original source →
               </a>

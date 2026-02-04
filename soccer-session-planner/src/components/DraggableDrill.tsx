@@ -23,23 +23,23 @@ export function DraggableDrill({ drill, onAddToSession }: DraggableDrillProps) {
     <div
       ref={setNodeRef}
       style={style}
-      className="cursor-move rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition-shadow hover:shadow-md"
+      className="cursor-move rounded-lg border border-slate-600 bg-slate-700 p-3 shadow-sm transition-shadow hover:shadow-md"
     >
       <div className="mb-2 flex items-start justify-between">
         <h4
-          className="text-sm font-medium text-slate-900"
+          className="text-sm font-medium text-slate-100"
           {...listeners}
           {...attributes}
         >
           {drill.name}
         </h4>
-        <span className="ml-2 rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800 capitalize">
+        <span className="ml-2 rounded-full bg-slate-600 px-2 py-0.5 text-xs font-medium text-slate-300 capitalize">
           {drill.category}
         </span>
       </div>
       <button
         onClick={() => onAddToSession(drill)}
-        className="w-full rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-green-700"
+        className="w-full rounded-lg bg-white px-3 py-1.5 text-xs font-medium text-slate-900 transition hover:bg-slate-200"
       >
         + Add to Session
       </button>

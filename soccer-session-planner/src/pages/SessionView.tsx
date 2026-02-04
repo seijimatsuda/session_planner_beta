@@ -61,21 +61,21 @@ export function SessionView() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="text-sm text-slate-600">Loading session...</div>
+        <div className="text-sm text-slate-400">Loading session...</div>
       </div>
     )
   }
 
   if (error || !session) {
     return (
-      <div className="rounded-xl border border-red-200 bg-red-50 p-8 text-center">
-        <p className="text-lg font-medium text-red-800">Error loading session</p>
-        <p className="mt-2 text-sm text-red-600">
+      <div className="rounded-xl border border-slate-600 bg-slate-800 p-8 text-center">
+        <p className="text-lg font-medium text-red-400">Error loading session</p>
+        <p className="mt-2 text-sm text-slate-400">
           {error instanceof Error ? error.message : 'Session not found'}
         </p>
         <button
           onClick={() => navigate('/sessions')}
-          className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+          className="mt-4 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
         >
           Back to Sessions
         </button>
@@ -94,10 +94,10 @@ export function SessionView() {
   // Create dynamic grid - only show rows/columns with drills
   const categories: Category[] = ['activation', 'dribbling', 'passing', 'shooting']
   const categoryColors: Record<string, string> = {
-    activation: 'border-yellow-400 bg-yellow-50',
-    dribbling: 'border-blue-400 bg-blue-50',
-    passing: 'border-green-400 bg-green-50',
-    shooting: 'border-red-400 bg-red-50',
+    activation: 'border-yellow-500 bg-yellow-900/30',
+    dribbling: 'border-blue-500 bg-blue-900/30',
+    passing: 'border-green-500 bg-green-900/30',
+    shooting: 'border-red-500 bg-red-900/30',
   }
 
   // Filter out completely empty rows
@@ -111,8 +111,8 @@ export function SessionView() {
       <header>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h1 className="text-3xl font-bold text-slate-900">{session.name}</h1>
-            <div className="mt-2 flex flex-col gap-1 text-sm text-slate-600">
+            <h1 className="text-3xl font-bold text-slate-100">{session.name}</h1>
+            <div className="mt-2 flex flex-col gap-1 text-sm text-slate-400">
               <p>Created {new Date(session.created_at).toLocaleDateString()}</p>
               {session.creator_email && <p>Created by {session.creator_email}</p>}
             </div>
@@ -120,14 +120,14 @@ export function SessionView() {
           <div className="flex gap-2">
             <button
               onClick={() => navigate(`/sessions/${id}/edit`)}
-              className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow transition hover:bg-blue-700"
+              className="rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow transition hover:bg-slate-200"
             >
               Edit
             </button>
             <button
               onClick={() => duplicateMutation.mutate()}
               disabled={duplicateMutation.isPending}
-              className="rounded-lg bg-yellow-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-yellow-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="rounded-lg bg-slate-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-slate-500 disabled:cursor-not-allowed disabled:bg-slate-700"
             >
               {duplicateMutation.isPending ? '...' : 'Duplicate'}
             </button>
@@ -138,7 +138,7 @@ export function SessionView() {
                 }
               }}
               disabled={deleteMutation.isPending}
-              className="rounded-lg bg-red-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-600 disabled:cursor-not-allowed disabled:bg-slate-300"
+              className="rounded-lg bg-slate-600 px-4 py-2 text-sm font-semibold text-slate-300 transition hover:bg-slate-500 hover:text-red-400 disabled:cursor-not-allowed disabled:bg-slate-700"
             >
               Delete
             </button>
@@ -148,11 +148,11 @@ export function SessionView() {
 
       {/* Dynamic Grid */}
       {filledRows.length === 0 ? (
-        <div className="rounded-xl border border-dashed border-slate-300 bg-white p-12 text-center">
-          <p className="text-lg font-medium text-slate-600">This session has no drills yet.</p>
+        <div className="rounded-xl border border-dashed border-slate-600 bg-slate-800 p-12 text-center">
+          <p className="text-lg font-medium text-slate-400">This session has no drills yet.</p>
           <button
             onClick={() => navigate(`/sessions/${id}/edit`)}
-            className="mt-4 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+            className="mt-4 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-slate-900 transition hover:bg-slate-200"
           >
             Add Drills
           </button>
@@ -168,8 +168,8 @@ export function SessionView() {
             if (filledCells.length === 0) return null
 
             return (
-              <div key={category} className="rounded-xl border border-slate-200 bg-white p-6">
-                <h2 className="mb-4 text-lg font-semibold capitalize text-slate-900">{category}</h2>
+              <div key={category} className="rounded-xl border border-slate-700 bg-slate-800 p-6">
+                <h2 className="mb-4 text-lg font-semibold capitalize text-slate-100">{category}</h2>
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                   {filledCells.map(({ drill, colIndex }) => {
                     if (!drill) return null
@@ -177,13 +177,13 @@ export function SessionView() {
                       <div
                         key={`${category}-${colIndex}`}
                         className={`cursor-pointer rounded-lg border-2 p-4 transition-shadow hover:shadow-md ${
-                          categoryColors[category] || 'border-gray-300 bg-white'
+                          categoryColors[category] || 'border-slate-600 bg-slate-700'
                         }`}
                         onClick={() => setSelectedDrill(drill)}
                       >
-                        <h3 className="font-semibold text-slate-900">{drill.name}</h3>
+                        <h3 className="font-semibold text-slate-100">{drill.name}</h3>
                         {drill.num_players && (
-                          <p className="mt-1 text-sm text-slate-600">Players: {drill.num_players}</p>
+                          <p className="mt-1 text-sm text-slate-400">Players: {drill.num_players}</p>
                         )}
                       </div>
                     )
