@@ -115,20 +115,32 @@ router.get('/*path', async (req: Request, res: Response) => {
     // Auth check
     const token = extractToken(req)
     if (!token) {
+      console.log('[media-proxy] No token found in request')
       return res.status(401).json({ error: 'Missing authorization token' })
     }
 
     const { valid, userId } = await verifyToken(token)
     if (!valid) {
+      console.log('[media-proxy] Token validation failed')
       return res.status(401).json({ error: 'Unauthorized' })
     }
 
-    const filePath = req.params.path
-    if (!filePath || filePath.includes('..') || filePath.startsWith('/')) {
+    // Handle path - may be string or array depending on Express version
+    let rawPath = req.params.path
+    console.log('[media-proxy] Raw path param:', rawPath, 'type:', typeof rawPath)
+
+    // Convert array to string if needed
+    const filePath = Array.isArray(rawPath) ? rawPath.join('/') : rawPath
+
+    // Strip leading slashes and validate
+    const cleanPath = filePath?.replace(/^\/+/, '') || ''
+
+    if (!cleanPath || cleanPath.includes('..')) {
+      console.log('[media-proxy] Invalid path after cleaning:', cleanPath)
       return res.status(400).json({ error: 'Invalid path' })
     }
 
-    const cleanPath = filePath.startsWith('/') ? filePath.slice(1) : filePath
+    console.log('[media-proxy] Clean path:', cleanPath)
 
     console.log(`[media-proxy] Fetching file: ${cleanPath} for user: ${userId}`)
 
@@ -219,20 +231,27 @@ router.head('/*path', async (req: Request, res: Response) => {
 
     const token = extractToken(req)
     if (!token) {
+      console.log('[media-proxy] HEAD: No token found')
       return res.status(401).end()
     }
 
     const { valid } = await verifyToken(token)
     if (!valid) {
+      console.log('[media-proxy] HEAD: Token validation failed')
       return res.status(401).end()
     }
 
-    const filePath = req.params.path
-    if (!filePath || filePath.includes('..') || filePath.startsWith('/')) {
+    // Handle path - may be string or array depending on Express version
+    const rawPath = req.params.path
+    const filePath = Array.isArray(rawPath) ? rawPath.join('/') : rawPath
+    const cleanPath = filePath?.replace(/^\/+/, '') || ''
+
+    if (!cleanPath || cleanPath.includes('..')) {
+      console.log('[media-proxy] HEAD: Invalid path:', cleanPath)
       return res.status(400).end()
     }
 
-    const cleanPath = filePath.startsWith('/') ? filePath.slice(1) : filePath
+    console.log('[media-proxy] HEAD request for:', cleanPath)
 
     const fileInfo = await getFileInfo(cleanPath)
     if (!fileInfo) {
