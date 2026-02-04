@@ -8,7 +8,8 @@ const app = express()
 // Media-specific CORS - MUST expose Range headers for iOS Safari
 app.use('/api/media', cors({
   origin: true,
-  credentials: true,
+  methods: ['GET', 'HEAD', 'OPTIONS'],
+  allowedHeaders: ['Range', 'Authorization', 'Content-Type'],
   exposedHeaders: ['Content-Range', 'Accept-Ranges', 'Content-Length', 'Content-Type']
 }))
 
