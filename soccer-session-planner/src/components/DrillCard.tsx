@@ -154,56 +154,9 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
               }}
             />
           ) : isVideo ? (
-            <div className="relative h-full w-full">
-              <video
-                src={mediaUrl}
-                playsInline
-                crossOrigin="anonymous"
-                // @ts-ignore - webkit-playsinline is needed for older iOS Safari
-                webkit-playsinline="true"
-                muted
-                className="h-full w-full object-cover"
-                preload="metadata"
-                onError={(e) => {
-                  const videoElement = e.currentTarget
-                  const errorDetails = {
-                    error: e,
-                    currentSrc: videoElement.currentSrc,
-                    networkState: videoElement.networkState,
-                    readyState: videoElement.readyState,
-                    errorCode: videoElement.error?.code,
-                    errorMessage: videoElement.error?.message,
-                    url: mediaUrl,
-                    drillName: drill.name,
-                  }
-                  console.error('[DrillCard] Video load error:', errorDetails)
-                  
-                  // Try to refresh URL on error
-                  setTimeout(async () => {
-                    try {
-                      console.log('[DrillCard] Attempting to refresh video URL...')
-                      const newUrl = await storageService.getVideoUrl(drill.video_file_path!, 3600)
-                      if (newUrl !== mediaUrl) {
-                        console.log('[DrillCard] Refreshing video URL')
-                        videoElement.src = newUrl
-                        setMediaUrl(newUrl)
-                        setMediaError(false)
-                      }
-                    } catch (refreshError) {
-                      console.error('[DrillCard] Failed to refresh video URL:', refreshError)
-                      setMediaError(true)
-                    }
-                  }, 1000)
-                }}
-                onLoadStart={() => {
-                  console.log('Video load started for:', drill.name)
-                }}
-                onLoadedData={() => {
-                  console.log('Video loaded successfully for:', drill.name)
-                  setMediaError(false)
-                }}
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-30">
+            <div className="relative h-full w-full bg-slate-800">
+              {/* Static thumbnail placeholder - don't load video until user clicks */}
+              <div className="absolute inset-0 flex items-center justify-center">
                 <div className="rounded-full bg-white bg-opacity-90 p-4">
                   <svg
                     className="h-12 w-12 text-slate-900"
@@ -214,6 +167,7 @@ export function DrillCard({ drill, onEdit, onDelete }: DrillCardProps) {
                   </svg>
                 </div>
               </div>
+              <p className="absolute bottom-2 left-2 text-xs text-white/70">Tap to play</p>
             </div>
           ) : isImage ? (
             <img
